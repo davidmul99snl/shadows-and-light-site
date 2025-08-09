@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "date": "2025-09-12",
+    "time": "20:00",
+    "venue": "Whelan's",
+    "city": "Dublin",
+    "country": "Ireland",
+    "tickets": "#",
+    "eventUrl": "#",
+    "price": "\u20ac22",
+    "status": "upcoming"
+  },
+  {
+    "id": 2,
+    "date": "2025-10-04",
+    "time": "19:30",
+    "venue": "Coughlan's",
+    "city": "Cork",
+    "country": "Ireland",
+    "tickets": "#",
+    "eventUrl": "#",
+    "price": "\u20ac20",
+    "status": "upcoming"
+  },
+  {
+    "id": 3,
+    "date": "2025-11-16",
+    "time": "20:00",
+    "venue": "The Black Box",
+    "city": "Galway",
+    "country": "Ireland",
+    "tickets": "#",
+    "eventUrl": "#",
+    "price": "\u20ac24",
+    "status": "upcoming"
+  }
+]
