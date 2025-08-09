@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'picsum.photos' }
-    ]
-  }
-}
-module.exports = nextConfig
+  output: 'export',          // ← ensures Next.js writes to /out
+  images: { unoptimized: true } // ← avoids next/image export issues
+};
+module.exports = nextConfig;
