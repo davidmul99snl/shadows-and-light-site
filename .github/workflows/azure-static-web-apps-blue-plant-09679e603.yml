@@ -25,7 +25,7 @@ jobs:
       # 👉 This step uploads the exported site from the `out` folder to Azure
       - uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ 33485dde2cc47434530186b32b7b3d6d6495c96d3dd629dfe1ad7a66adbb8f6c01-1b84b941-8e3b-455e-94e0-efb3f3044c52003022709679e603 }} # ← keep YOUR existing secret name
+          azure_static_web_apps_api_token: ${{ 9a333553ed9968dab016216f9de279610cd89de2ffb2ff4cce3f766e323e069e01-3c88950d-e4a7-4d59-8aed-1b9e4d3606ee003022709679e603 }} # ← keep YOUR existing secret name
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: "/"
@@ -38,7 +38,8 @@ jobs:
     steps:
       - uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ 33485dde2cc47434530186b32b7b3d6d6495c96d3dd629dfe1ad7a66adbb8f6c01-1b84b941-8e3b-455e-94e0-efb3f3044c52003022709679e603 }} # same secret name
+          azure_static_web_apps_api_token: ${{ 9a333553ed9968dab016216f9de279610cd89de2ffb2ff4cce3f766e323e069e01-3c88950d-e4a7-4d59-8aed-1b9e4d3606ee003022709679e603 }} # same secret name
           action: "close"
+
 
 
