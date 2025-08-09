@@ -6,6 +6,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches: [ "main" ]
+- run: ls -la
+- run: ls -la out || echo "No out/ directory found"
 
 jobs:
   build_and_deploy:
@@ -42,6 +44,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
  # same secret name
           action: "close"
+
 
 
 
