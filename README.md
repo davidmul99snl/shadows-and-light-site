@@ -3,7 +3,7 @@
 A minimal Next.js site with an elegant “shadows & light” theme and simple JSON-based content for **Gigs** and **Media**. 
 This deploys cleanly to **Azure Static Web Apps** and can be upgraded to a headless CMS (Sanity) later.
 
-## Quick start
+## Quick  start
 1. Upload these files to a new GitHub repository.
 2. In Azure Portal, create **Static Web App**:
    - Source: GitHub → select your repo and branch
