@@ -8,15 +8,14 @@ export default function Contact() {
     <div className={styles.wrap}>
       <div className={styles.hero} style={{ backgroundImage: `url(${HERO})`}}>
         <div className={styles.scrim}>
-          <h1>Contact</h1>
-          <p>Bookings & enquiries</p>
-        </div>
       </div>
-
+{/* Content starts below the banner */}
       <div className={styles.content}>
+        <h1 className={styles.pageTitle}>Contact</h1>
+      
         <p>We’d love to hear from you — bookings, festivals, theatres, and private events.</p>
         <p>
-          Email us: <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a>
+          Email us: <a className={styles.link} href="mailto:shadowsandlightmusic@gmail.com">YOUR_EMAIL_HERE</a>
         </p>
         <p className={styles.muted}>
           (Replace with your real inbox. We can add a contact form later via Azure Functions.)
