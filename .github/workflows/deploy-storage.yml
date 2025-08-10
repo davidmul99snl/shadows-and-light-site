@@ -1,0 +1,32 @@
+name: Deploy to Azure Storage Static Website
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps
+        run: npm install
+
+      - name: Build (Next static export)
+        run: npm run build
+
+      - name: Verify out folder exists
+        run: ls -la out || (echo "No out directory found" && exit 1)
+
+      - name: Upload to $web
+        uses: azure/cli@v2
+        with:
+          inlineScript: az storage blob upload-batch --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --destination '$web' --source ./out --sas-token "${{ secrets.AZURE_STORAGE_SAS }}" --overwrite
