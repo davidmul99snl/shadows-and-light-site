@@ -26,3 +26,27 @@
   background: linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.45));
   padding: 48px 24px;
 }
+/* Ensure the hero content is centered */
+.heroWithImage {
+  display: grid;
+}
+
+.heroScrim {
+  display: grid;
+  place-items: center;    /* centers content horizontally & vertically */
+  text-align: center;
+  padding: 56px 24px;     /* a bit more breathing room */
+}
+
+/* Keep the CTA buttons centered */
+.ctaRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Nice readable width for the heading */
+.hero h1 {
+  margin: 0 auto;
+  max-width: 900px;
+}
