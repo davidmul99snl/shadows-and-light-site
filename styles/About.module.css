@@ -1,0 +1,11 @@
+.wrap { min-height: 100vh; }
+.hero { height: 42vh; background-size: cover; background-position: center; display: grid; }
+.scrim { background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.65)); display: grid; align-content: end; padding: 24px; color: white; }
+.scrim h1 { margin: 0 0 6px; }
+.scrim p { margin: 0 0 8px; color: var(--muted); }
+.content { max-width: 900px; margin: 24px auto; padding: 0 24px 48px; }
+.photo { margin: 24px 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--ring); background: var(--panel); }
+.photo img { display: block; width: 100%; height: auto; }
+.muted { color: var(--muted); font-size: 14px; }
+.back { margin-top: 16px; }
+.link { text-decoration: underline; }
