@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import styles from '../styles/Press.module.css'
 
-const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg041.jpg';
+const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg041.jpg?w=1600';
 
 const QUOTES = [
   {
