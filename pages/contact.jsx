@@ -20,8 +20,8 @@ export default function Contact() {
 
         <p>
           Email us:{" "}
-          <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">
-            YOUR_EMAIL_HERE
+          <a className={styles.link} href="mailto:shadowsandlightmusic@gmail.com">
+            
           </a>
         </p>
 
