@@ -16,18 +16,13 @@ export default function Contact() {
         <p>We’d love to hear from you — bookings, festivals, theatres, and private events.</p>
 
         <p>
-          Email us:{" "}
-          <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a>
+          Email us: <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a>
         </p>
 
         <div className={styles.socials}>
           <a href="https://www.facebook.com/shadowsandlightmusic" target="_blank" rel="noreferrer">Facebook</a>
           <a href="https://twitter.com/joni_shadows" target="_blank" rel="noreferrer">X / Twitter</a>
           <a href="/media">Videos &amp; Audio</a>
-        </div>
-
-        <div className={styles.back}>
-          <Link href="/">← Back to home</Link>
         </div>
       </div>
     </div>
