@@ -1,5 +1,5 @@
- - name: Check token secret is present
-        run: |
+ name: Check token secret is present
+        run: 
           if [ -z "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_PLANT_09679E603 }}" ]; then
             echo "Token secret is NOT available to this workflow"; exit 1;
           else
