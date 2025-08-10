@@ -50,3 +50,47 @@
   margin: 0 auto;
   max-width: 900px;
 }
+/* Center the hero block and content */
+.heroWithImage {
+  display: grid;
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* This container spans full width and centers all inner content */
+.heroScrim {
+  width: 100%;
+  min-height: 48vh;
+  display: grid;
+  place-items: center;   /* centers both axes */
+  text-align: center;
+  padding: 64px 24px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.20), rgba(0,0,0,.40));
+}
+
+/* Keep the big heading nicely centered and not too wide */
+.heroTitle {
+  margin: 0 auto 12px;
+  max-width: 900px;
+}
+
+/* Optional: tagline width */
+.heroTagline {
+  margin: 0 auto 16px;
+  max-width: 720px;
+  opacity: .9;
+}
+
+/* Center the buttons */
+.ctaRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* If the span had custom layout before, force it to center inline */
+.gradientText {
+  display: inline-block;
+}
