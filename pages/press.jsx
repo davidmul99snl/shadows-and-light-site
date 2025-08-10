@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import styles from '../styles/Press.module.css'
 
-const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg041.jpg?w=1600';
+const HERO = '/hero-press.jpg'
 
 const QUOTES = [
   {
@@ -25,13 +25,12 @@ export default function Press() {
   return (
     <div className={styles.wrap}>
       <div className={styles.hero} style={{ backgroundImage: `url(${HERO})` }}>
-        <div className={styles.scrim}>
-          <h1>Press</h1>
-          <p>Words about the show</p>
-        </div>
+        <div className={styles.scrim} />
       </div>
 
       <div className={styles.grid}>
+        <h1 className={styles.pageTitle}>Press</h1>
+
         {QUOTES.map((q, i) => (
           <blockquote className={styles.card} key={i}>
             <p>“{q.quote}”</p>
