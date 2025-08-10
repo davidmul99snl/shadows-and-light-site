@@ -1,3 +1,4 @@
+// pages/contact.jsx
 import Link from 'next/link'
 import styles from '../styles/Contact.module.css'
 
@@ -6,17 +7,24 @@ const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featur
 export default function Contact() {
   return (
     <div className={styles.wrap}>
-      <div className={styles.hero} style={{ backgroundImage: `url(${HERO})`}}>
-        <div className={styles.scrim}>
+      {/* Banner image (no title text on top) */}
+      <div className={styles.hero} style={{ backgroundImage: `url(${HERO})` }}>
+        <div className={styles.scrim} />
       </div>
-{/* Content starts below the banner */}
+
+      {/* Content below the banner */}
       <div className={styles.content}>
         <h1 className={styles.pageTitle}>Contact</h1>
-      
+
         <p>We’d love to hear from you — bookings, festivals, theatres, and private events.</p>
+
         <p>
-          Email us: <a className={styles.link} href="mailto:shadowsandlightmusic@gmail.com">YOUR_EMAIL_HERE</a>
+          Email us:{" "}
+          <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">
+            YOUR_EMAIL_HERE
+          </a>
         </p>
+
         <p className={styles.muted}>
           (Replace with your real inbox. We can add a contact form later via Azure Functions.)
         </p>
@@ -24,7 +32,7 @@ export default function Contact() {
         <div className={styles.socials}>
           <a href="https://www.facebook.com/shadowsandlightmusic" target="_blank" rel="noreferrer">Facebook</a>
           <a href="https://twitter.com/joni_shadows" target="_blank" rel="noreferrer">X / Twitter</a>
-          <a href="/media">Videos & Audio</a>
+          <a href="/media">Videos &amp; Audio</a>
         </div>
 
         <div className={styles.back}>
