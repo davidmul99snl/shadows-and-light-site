@@ -28,10 +28,6 @@ export default function About() {
           The show features songs across Joni’s huge repertoire, including classics from <em>Blue</em> and
           deeper cuts like “Hejira,” “Secret Place” and “The Hissing of Summer Lawns.”
         </p>
-
-        <div className={styles.back}>
-          <Link href="/">← Back to home</Link>
-        </div>
       </div>
     </div>
   )
