@@ -1,5 +1,5 @@
 # Shadows & Light — Starter (Next.js, Azure Static Web Apps)
-
+Retry 
 A minimal Next.js site with an elegant “shadows & light” theme and simple JSON-based content for **Gigs** and **Media**. 
 This deploys cleanly to **Azure Static Web Apps** and can be upgraded to a headless CMS (Sanity) later.
 
