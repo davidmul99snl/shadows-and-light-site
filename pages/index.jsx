@@ -1,4 +1,4 @@
-const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg012.jpg?w=1600';
+const HERO = '/hero-home.jpg'
 
 import Link from 'next/link'
 import styles from '../styles/Home.module.css'
