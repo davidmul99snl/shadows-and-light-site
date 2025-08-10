@@ -26,10 +26,6 @@ export default function Press() {
           </blockquote>
         ))}
       </div>
-
-      <div className={styles.back}>
-        <Link href="/">← Back to home</Link>
-      </div>
     </div>
-  );
+  )
 }
