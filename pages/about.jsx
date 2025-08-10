@@ -1,3 +1,4 @@
+// pages/about.jsx
 import Link from 'next/link'
 import styles from '../styles/About.module.css'
 
@@ -6,17 +7,18 @@ const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featur
 export default function About() {
   return (
     <div className={styles.wrap}>
-      <div className={styles.hero} style={{ backgroundImage: `url(${HERO})`}}>
-        <div className={styles.scrim}>
-          <h1>About Us</h1>
-          <p>Celebrating the songs and stories of Joni Mitchell</p>
-        </div>
+      {/* Banner image (no title here) */}
+      <div className={styles.hero} style={{ backgroundImage: `url(${HERO})` }}>
+        <div className={styles.scrim} />
       </div>
 
+      {/* Content starts below the banner */}
       <div className={styles.content}>
+        <h1 className={styles.pageTitle}>About Us</h1>
+
         <p>
           Maura, Dave and Paul have a long musical pedigree — Dave and Paul have been playing together
-          for 25 years, while Maura has been singing with the guys as part of Shadows & Light in Dublin.
+          for 25 years, while Maura has been singing with the guys as part of Shadows &amp; Light in Dublin.
           Dave has a Degree in Jazz Performance from Newpark Music School, Paul is a full-time composer,
           and Maura has a Masters in Music and is a full-time music teacher.
         </p>
