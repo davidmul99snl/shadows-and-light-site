@@ -1,18 +1,15 @@
-// pages/about.jsx
 import Link from 'next/link'
 import styles from '../styles/About.module.css'
 
-const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg012.jpg?w=1600'
+const HERO = '/hero-about.jpg'
 
 export default function About() {
   return (
     <div className={styles.wrap}>
-      {/* Banner image (no title here) */}
       <div className={styles.hero} style={{ backgroundImage: `url(${HERO})` }}>
         <div className={styles.scrim} />
       </div>
 
-      {/* Content starts below the banner */}
       <div className={styles.content}>
         <h1 className={styles.pageTitle}>About Us</h1>
 
@@ -24,10 +21,7 @@ export default function About() {
         </p>
 
         <div className={styles.photo}>
-          <img
-            src="https://shadowsandlightmusic.com/wp-content/uploads/2020/01/shadows-and-light-colour-naul-2018-hi-res.jpg?w=1200"
-            alt="Shadows & Light performing live"
-          />
+          <img src="/live.jpg" alt="Shadows & Light performing live" />
         </div>
 
         <p>
