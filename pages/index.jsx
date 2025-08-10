@@ -7,36 +7,28 @@ const HERO = '/hero-home.jpg'
 export default function Home() {
   return (
     <main>
-      {/* HERO */}
-      <section
-        className={`${styles.hero ?? ''} ${styles.heroWithImage ?? ''}`}
+      {/* Full-bleed banner image */}
+      <div
+        className={styles.banner}
         style={{ backgroundImage: `url(${HERO})` }}
-      >
-        <div className={styles.heroScrim ?? ''}>
-          <h1 className={styles.heroTitle ?? ''}>
-            Eclectic songs, luminous arrangements —{' '}
-            <span className={styles.gradientText ?? ''}>
-              the play of shadows &amp; light.
-            </span>
-          </h1>
+        aria-hidden="true"
+      />
 
-          <p className={styles.heroTagline ?? ''}>
-            A modern, accessible site for fast gig updates and rich media.
-          </p>
+      {/* Text BELOW the image, centered */}
+      <section className={styles.heroContent}>
+        <h1 className={styles.heroTitle}>
+          Eclectic songs, luminous arrangements —{' '}
+          <span className={styles.gradientText}>the play of shadows &amp; light.</span>
+        </h1>
 
-          <div className={styles.ctaRow ?? ''}>
-            <Link className={styles.button ?? ''} href="/gigs">Next shows</Link>
-            <Link className={styles.buttonOutline ?? ''} href="/media">Watch &amp; listen</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Simple links section (kept minimal to avoid style coupling) */}
-      <section style={{ padding: '24px' }}>
-        <p>
-          Explore: <Link href="/about">About Us</Link> · <Link href="/press">Press</Link> ·{' '}
-          <Link href="/contact">Contact</Link>
+        <p className={styles.heroTagline}>
+          A modern, accessible site for fast gig updates and rich media.
         </p>
+
+        <div className={styles.ctaRow}>
+          <Link className={styles.button} href="/gigs">Next shows</Link>
+          <Link className={styles.buttonOutline} href="/media">Watch &amp; listen</Link>
+        </div>
       </section>
     </main>
   )
