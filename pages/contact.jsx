@@ -1,18 +1,15 @@
-// pages/contact.jsx
 import Link from 'next/link'
 import styles from '../styles/Contact.module.css'
 
-const HERO = 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg012.jpg?w=1600'
+const HERO = '/hero-contact.jpg'
 
 export default function Contact() {
   return (
     <div className={styles.wrap}>
-      {/* Banner image (no title text on top) */}
       <div className={styles.hero} style={{ backgroundImage: `url(${HERO})` }}>
         <div className={styles.scrim} />
       </div>
 
-      {/* Content below the banner */}
       <div className={styles.content}>
         <h1 className={styles.pageTitle}>Contact</h1>
 
@@ -20,13 +17,7 @@ export default function Contact() {
 
         <p>
           Email us:{" "}
-          <a className={styles.link} href="mailto:shadowsandlightmusic@gmail.com">
-            
-          </a>
-        </p>
-
-        <p className={styles.muted}>
-          (Replace with your real inbox. We can add a contact form later via Azure Functions.)
+          <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a>
         </p>
 
         <div className={styles.socials}>
