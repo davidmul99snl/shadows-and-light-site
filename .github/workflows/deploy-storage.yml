@@ -6,6 +6,21 @@ on:
   workflow_dispatch:
 
 jobs:
+        - name: Make public folder
+        run: mkdir -p public
+
+      - name: Fetch home hero
+        run: curl -fsSL -o public/hero-home.jpg 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg012.jpg'
+
+      - name: Copy about + contact hero (same art as home)
+        run: cp public/hero-home.jpg public/hero-about.jpg && cp public/hero-home.jpg public/hero-contact.jpg
+
+      - name: Fetch press hero
+        run: curl -fsSL -o public/hero-press.jpg 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg041.jpg'
+
+      - name: Fetch live photo
+        run: curl -fsSL -o public/live.jpg 'https://shadowsandlightmusic.com/wp-content/uploads/2020/01/shadows-and-light-colour-naul-2018-hi-res.jpg'
+
   build_and_upload:
     runs-on: ubuntu-latest
     steps:
