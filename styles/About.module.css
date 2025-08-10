@@ -1,6 +1,6 @@
 .wrap { min-height: 100vh; }
 .hero { height: 42vh; background-size: cover; background-position: center; display: grid; }
-.scrim { background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.65)); display: grid; align-content: end; padding: 24px; color: white; }
+.scrim { background: linear-gradient(to bottom, rgba(0,0,0,.20), rgba(0,0,0,.40)); /* ... */ }
 .scrim h1 { margin: 0 0 6px; }
 .scrim p { margin: 0 0 8px; color: var(--muted); }
 .content { max-width: 900px; margin: 24px auto; padding: 0 24px 48px; }
