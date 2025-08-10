@@ -1,21 +1,9 @@
-      name: Check token secret is present
-        run: |
-          if [ -z "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_PLANT_09679E603 }}" ]; then
-            echo "Token secret is NOT available to this workflow"; exit 1;
-          else
-            echo "Token secret is present";
-          fi
-
-
-
 name: Deploy to Azure Static Web Apps
-
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -31,16 +19,16 @@ jobs:
       - name: Install deps
         run: npm ci || npm install
 
-      - name: Build Next export
+      - name: Build
         run: npm run build
 
-      - name: Debug list out
-        run: |
-          pwd
-          ls -la
-          ls -la out || echo "No out/ directory found"
+      - name: List root
+        run: ls -la
 
-      - name: Deploy to Azure Static Web Apps
+      - name: List out dir
+        run: ls -la out || echo "No out directory found"
+
+      - name: Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_PLANT_09679E603 }}
