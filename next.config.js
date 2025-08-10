@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
-module.exports = {
+const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
-  images: { unoptimized: true },
-};
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'picsum.photos' }
+    ]
+  }
+}
+module.exports = nextConfig
