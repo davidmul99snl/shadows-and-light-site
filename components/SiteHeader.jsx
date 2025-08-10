@@ -4,10 +4,8 @@ import styles from './SiteHeader.module.css'
 export default function SiteHeader() {
   return (
     <header className={styles.nav}>
-      <div className={styles.brand}>
-        <Link href="/">Shadows & Light</Link>
-      </div>
       <nav className={styles.links}>
+        <Link href="/">Home</Link>
         <Link href="/gigs">Gigs</Link>
         <Link href="/media">Media</Link>
         <Link href="/about">About Us</Link>
