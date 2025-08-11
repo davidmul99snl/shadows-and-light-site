@@ -22,7 +22,7 @@ export default function Home() {
         </h1>
 
         <p className={styles.heroTagline}>
-          A modern, accessible site for fast gig updates and rich media.
+          Joni's music from across the decades.
         </p>
 
         <div className={styles.ctaRow}>
