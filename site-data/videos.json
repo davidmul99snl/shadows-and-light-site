@@ -1,12 +1,17 @@
 [
-  {
-    "id": 1,
-    "title": "A Case Of You (live)",
-    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  },
-  {
-    "id": 2,
-    "title": "Both Sides Now (studio)",
-    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  }
+{
+"title": "The Play of Shadows (Official Video)",
+"src": "/video/play-of-shadows.mp4",
+"poster": "/images/posters/play-of-shadows.jpg",
+"captions": "/captions/play-of-shadows.vtt"
+},
+{
+"title": "Live at Civic Theatre (Excerpt)",
+"src": "/video/live-civic-excerpt.mp4",
+"poster": "/images/posters/civic-live.jpg"
+},
+{
+"title": "Press Interview (YouTube)",
+"embedUrl": "https://www.youtube.com/embed/XXXXXXXX?rel=0"
+}
 ]
