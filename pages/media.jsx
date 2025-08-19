@@ -1,57 +1,43 @@
-import Link from 'next/link'
-import styles from '../styles/Media.module.css'
-import photos from '../site-data/photos.json'
-import videos from '../site-data/videos.json'
-import audio from '../site-data/audio.json'
-import Image from 'next/image'
+// pages/media.tsx
+import { useEffect, useState } from "react";
+import AudioPlayer, { type Track } from "../components/AudioPlayer";
+import VideoGallery, { type VideoItem } from "../components/VideoGallery";
 
-export default function Media() {
-  return (
-    <div className={styles.wrap}>
-      <header className={styles.header}>
-        <Link href="/">← Home</Link>
-        <h1>Media</h1>
-        <p>Photos, videos, and audio — easy to add after launch.</p>
-      </header>
 
-      <h2 className={styles.subhead}>Photos</h2>
-      <div className={styles.grid}>
-        {photos.map(p => (
-          <div key={p.id} className={styles.photoCard}>
-            {/* Using img for simplicity; can swap to next/image if needed */}
-            <img src={p.src} alt={p.alt} />
-          </div>
-        ))}
-      </div>
+export default function MediaPage() {
+const [tracks, setTracks] = useState<Track[]>([]);
+const [videos, setVideos] = useState<VideoItem[]>([]);
 
-      <h2 className={styles.subhead}>Videos</h2>
-      <div className={styles.gridVideos}>
-        {videos.map(v => (
-          <div key={v.id} className={styles.videoCard}>
-            <div className={styles.videoPlaceholder}>
-              <a href={v.url} target="_blank" rel="noreferrer">Play “{v.title}”</a>
-            </div>
-            <div className={styles.videoMeta}>
-              <div className={styles.videoTitle}>{v.title}</div>
-              <div className={styles.badge}>YouTube</div>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      <h2 className={styles.subhead}>Audio</h2>
-      <div className={styles.audioList}>
-        {audio.map(a => (
-          <div key={a.id} className={styles.audioItem}>
-            <div className={styles.audioTitle}>{a.title}</div>
-            <div className={styles.audioActions}>
-              <a className={styles.buttonOutline} href={a.url}>Play</a>
-              <a className={styles.buttonGhost} href={a.url} download>Download</a>
-            </div>
-          </div>
-        ))}
-      </div>
+useEffect(() => {
+fetch("/site-data/audio.json").then(r => r.json()).then(setTracks).catch(() => setTracks([]));
+fetch("/site-data/videos.json").then(r => r.json()).then(setVideos).catch(() => setVideos([]));
+}, []);
 
-    </div>
-  )
+
+return (
+<main className="max-w-5xl mx-auto px-4 py-10">
+<section className="mb-8">
+<div className="w-full h-48 md:h-64 bg-[url('/banners/media.jpg')] bg-cover bg-center rounded-2xl shadow-lg" />
+<h1 className="mt-4 text-3xl font-semibold">Music & Video</h1>
+<p className="opacity-80">Listen and watch — updated via JSON files.</p>
+</section>
+
+
+{tracks.length > 0 ? (
+<section className="mb-12">
+<h2 className="text-2xl font-semibold mb-3">Music</h2>
+<AudioPlayer tracks={tracks} />
+</section>
+) : null}
+
+
+{videos.length > 0 ? (
+<section>
+<h2 className="text-2xl font-semibold mb-3">Videos</h2>
+<VideoGallery videos={videos} />
+</section>
+) : null}
+</main>
+);
 }
