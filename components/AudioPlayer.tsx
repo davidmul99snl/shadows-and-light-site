@@ -1,4 +1,33 @@
+"use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+
+export type Track = {
+title: string;
+artist?: string;
+src: string;
+duration?: string;
+cover?: string;
+};
+
+
+export default function AudioPlayer({ tracks }: { tracks: Track[] }) {
+const audioRef = useRef<HTMLAudioElement | null>(null);
+const [index, setIndex] = useState(0);
+const [isPlaying, setIsPlaying] = useState(false);
+const current = useMemo(() => tracks[index], [tracks, index]);
+
+
+useEffect(() => {
+const el = audioRef.current;
+if (!el) return;
+if (isPlaying) {
+el.play().catch(() => setIsPlaying(false));
+}
+}, [index, isPlaying]);
+
+
+const playPause = () => {
 const el = audioRef.current;
 if (!el) return;
 if (el.paused) {
@@ -61,14 +90,4 @@ onClick={() => setIndex(i)}
 className={`w-full text-left px-2 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 ${
 i === index ? "font-semibold" : ""
 }`}
-aria-current={i === index ? "true" : undefined}
->
-{t.title} {t.duration ? <span className="opacity-60">· {t.duration}</span> : null}
-</button>
-</li>
-))}
-</ol>
-</div>
-</div>
-);
 }
