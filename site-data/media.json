@@ -1,0 +1,18 @@
+[
+  {
+    "id": "track-001",
+    "type": "audio",
+    "title": "Eclectic Sons (Live)",
+    "src": "/audio/eclectic-sons-live.mp3",
+    "description": "Recorded at Civic Theatre."
+  },
+  {
+    "id": "vid-001",
+    "type": "video",
+    "title": "The Play of Shadows & Light",
+    "src": "/video/play-of-shadows.mp4",
+    "poster": "/video/posters/play-of-shadows.jpg",
+    "mime": "video/mp4",
+    "description": "Highlights from the 2024 set."
+  }
+]
