@@ -13,6 +13,13 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # Make secrets available via env for conditions & scripts
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+      AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+      AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,10 +59,10 @@ jobs:
 
       # OPTION A: Connection string (recommended)
       - name: Enable static website + sync (connection string)
-        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING != '' }}
+        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING != '' }}
         uses: azure/cli@v2
         env:
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ env.AZURE_STORAGE_CONNECTION_STRING }}
         with:
           azcliversion: "2.61.0"
           inlineScript: |
@@ -74,11 +81,11 @@ jobs:
 
       # OPTION B: Account name + key
       - name: Enable static website + sync (account + key)
-        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING == '' && secrets.AZURE_STORAGE_ACCOUNT != '' && secrets.AZURE_STORAGE_KEY != '' }}
+        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING == '' && env.AZURE_STORAGE_ACCOUNT != '' && env.AZURE_STORAGE_KEY != '' }}
         uses: azure/cli@v2
         env:
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+          AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY: ${{ env.AZURE_STORAGE_KEY }}
         with:
           azcliversion: "2.61.0"
           inlineScript: |
@@ -99,11 +106,11 @@ jobs:
 
       # OPTION C: Account name + SAS token (STATIC WEBSITE MUST ALREADY BE ENABLED)
       - name: Sync only (account + SAS)
-        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING == '' && secrets.AZURE_STORAGE_ACCOUNT != '' && secrets.AZURE_STORAGE_SAS_TOKEN != '' }}
+        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING == '' && env.AZURE_STORAGE_ACCOUNT != '' && env.AZURE_STORAGE_SAS_TOKEN != '' }}
         uses: azure/cli@v2
         env:
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ env.AZURE_STORAGE_SAS_TOKEN }}
         with:
           azcliversion: "2.61.0"
           inlineScript: |
@@ -119,11 +126,4 @@ jobs:
 
       # If none of the above ran, fail with a clear message
       - name: Fail if no Azure credentials provided
-        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING == '' && (secrets.AZURE_STORAGE_ACCOUNT == '' || (secrets.AZURE_STORAGE_KEY == '' && secrets.AZURE_STORAGE_SAS_TOKEN == '')) }}
-        run: |
-          echo "❌ No Azure Storage credentials configured."
-          echo "Set ONE of the following in Repo Settings → Secrets and variables → Actions:"
-          echo "  • AZURE_STORAGE_CONNECTION_STRING   (recommended)"
-          echo "  • AZURE_STORAGE_ACCOUNT + AZURE_STORAGE_KEY"
-          echo "  • AZURE_STORAGE_ACCOUNT + AZURE_STORAGE_SAS_TOKEN (static website must already be enabled)"
-          exit 1
+        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING == '' && (env.AZURE_STORAGE_ACCOUNT == '_
