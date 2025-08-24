@@ -2,7 +2,7 @@ name: Deploy to Azure Static Website
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 concurrency:
@@ -22,19 +22,31 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install dependencies (works with or without lockfile)
         run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          if [ -f package-lock.json ]; then
+            echo "Using npm ci (lockfile present)"
+            npm ci
+          else
+            echo "No lockfile found — using npm install"
+            npm install
+          fi
 
       - name: Generate media JSON (audio/videos)
         run: |
-          if [ -f scripts/generateMedia.cjs ]; then node scripts/generateMedia.cjs; else echo "No generator script found"; fi
+          if [ -f scripts/generateMedia.cjs ]; then
+            node scripts/generateMedia.cjs
+          else
+            echo "scripts/generateMedia.cjs not found — skipping generator."
+          fi
 
-      - name: Build (Next.js output:'export' produces ./out)
+      # With next.config.js { output: "export" }, this produces ./out
+      - name: Build (Next.js static export)
         run: npm run build
 
       - name: Verify build output exists
-        run: test -d out
+        run: |
+          test -d out && echo "✅ out/ exists" || (echo "❌ out/ not found"; exit 1)
 
       - name: Upload to Azure Static Website
         uses: azure/cli@v2
@@ -44,7 +56,7 @@ jobs:
           AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
           AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
         with:
-          azcliversion: 2.61.0
+          azcliversion: "2.61.0"
           inlineScript: |
             set -e
 
@@ -52,37 +64,25 @@ jobs:
               echo "Using connection string"
               az storage blob service-properties update \
                 --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-                --static-website --index-document index.html --404-document 404.html
+                --static-website \
+                --index-document index.html \
+                --404-document 404.html
 
               az storage blob sync \
                 --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-                -c '$web' -s ./out --delete
+                -c '$web' \
+                -s ./out \
+                --delete-destination true
 
             elif [ -n "$AZURE_STORAGE_ACCOUNT" ] && [ -n "$AZURE_STORAGE_KEY" ]; then
               echo "Using account + key"
               az storage blob service-properties update \
                 --account-name "$AZURE_STORAGE_ACCOUNT" \
                 --account-key "$AZURE_STORAGE_KEY" \
-                --static-website --index-document index.html --404-document 404.html
+                --static-website \
+                --index-document index.html \
+                --404-document 404.html
 
               az storage blob sync \
                 --account-name "$AZURE_STORAGE_ACCOUNT" \
-                --account-key "$AZURE_STORAGE_KEY" \
-                -c '$web' -s ./out --delete
-
-            elif [ -n "$AZURE_STORAGE_ACCOUNT" ] && [ -n "$AZURE_STORAGE_SAS_TOKEN" ]; then
-              echo "Using account + SAS token"
-              echo "(Skipping static-website enable; API requires account key/conn string)"
-              az storage blob sync \
-                --account-name "$AZURE_STORAGE_ACCOUNT" \
-                --sas-token "$AZURE_STORAGE_SAS_TOKEN" \
-                -c '$web' -s ./out --delete
-
-            else
-              echo "❌ No Azure storage credentials provided."
-              echo "Provide one of:"
-              echo "  • AZURE_STORAGE_CONNECTION_STRING   (recommended)"
-              echo "  • AZURE_STORAGE_ACCOUNT + AZURE_STORAGE_KEY"
-              echo "  • AZURE_STORAGE_ACCOUNT + AZURE_STORAGE_SAS_TOKEN (static website must already be enabled)"
-              exit 1
-            fi
+                --accou
