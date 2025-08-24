@@ -21,9 +21,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          # NOTE: do NOT set "cache: npm" here — it requires a lockfile and will error
+          # don't enable npm caching here; it requires a lockfile and will fail if missing
 
-      # Optional Next.js build cache (safe even without a lockfile)
+      # Optional build cache; safe even without a lockfile
       - name: Cache Next.js build cache
         uses: actions/cache@v4
         with:
@@ -42,7 +42,7 @@ jobs:
             npm install
           fi
 
-      # Run the generator explicitly (in case you didn't add "prebuild" in package.json)
+      # Run media generator explicitly (okay if you also have "prebuild")
       - name: Generate media JSON (audio/videos)
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
@@ -51,7 +51,7 @@ jobs:
             echo "scripts/generateMedia.cjs not found — skipping generator."
           fi
 
-      # Build. With next.config.js { output: 'export' } this creates ./out
+      # With next.config.js { output: 'export' }, "npm run build" produces ./out
       - name: Build (Next.js static export via output:'export')
         run: npm run build
 
@@ -59,36 +59,32 @@ jobs:
         run: |
           test -d out && echo "✅ out/ exists" || (echo "❌ out/ not found"; exit 1)
 
-      - name: Setup Azure CLI
+      # Single azure/cli step with inlineScript (required by the action)
+      - name: Upload to Azure Static Website
         uses: azure/cli@v2
-
-      - name: Enable Static Website (idempotent)
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        run: |
-          az storage blob service-properties update \
-            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            --static-website \
-            --index-document index.html \
-            --404-document 404.html
+        with:
+          azcliversion: 2.61.0
+          inlineScript: |
+            set -e
+            echo "Enabling static website..."
+            az storage blob service-properties update \
+              --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+              --static-website \
+              --index-document index.html \
+              --404-document 404.html
 
-      - name: Sync ./out to $web
-        env:
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        run: |
-          az storage blob sync \
-            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-            -c '$web' \
-            -s ./out \
-            --delete
+            echo "Syncing ./out to \$web..."
+            az storage blob sync \
+              --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+              -c '$web' \
+              -s ./out \
+              --delete
 
-      # Optional: normalize content-types if Azure set octet-stream
-      # - name: Normalize content-types (optional)
-      #   env:
-      #     AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-      #   run: |
-      #     set -e
-      #     az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix audio/ --output tsv --query "[].name" | \
-      #       xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "audio/mpeg"
-      #     az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix video/ --output tsv --query "[].name" | \
-      #       xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "video/mp4"
+            # Optional: normalize content-types if needed
+            # echo "Normalizing common content-types..."
+            # az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix audio/ --output tsv --query "[].name" | \
+            #   xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "audio/mpeg" || true
+            # az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix video/ --output tsv --query "[].name" | \
+            #   xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "video/mp4" || true
