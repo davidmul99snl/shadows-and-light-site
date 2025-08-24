@@ -48,41 +48,55 @@ jobs:
         run: |
           test -d out && echo "✅ out/ exists" || (echo "❌ out/ not found"; exit 1)
 
-      - name: Upload to Azure Static Website
+      # --- Azure upload using ONE of three credential options ---
+
+      # OPTION A: Connection string (recommended)
+      - name: Enable static website + sync (connection string)
+        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING != '' }}
         uses: azure/cli@v2
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
         with:
           azcliversion: "2.61.0"
           inlineScript: |
             set -e
+            az storage blob service-properties update \
+              --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+              --static-website \
+              --index-document index.html \
+              --404-document 404.html
 
-            if [ -n "$AZURE_STORAGE_CONNECTION_STRING" ]; then
-              echo "Using connection string"
-              az storage blob service-properties update \
-                --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-                --static-website \
-                --index-document index.html \
-                --404-document 404.html
+            az storage blob sync \
+              --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+              -c '$web' \
+              -s ./out \
+              --delete-destination true
 
-              az storage blob sync \
-                --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
-                -c '$web' \
-                -s ./out \
-                --delete-destination true
+      # OPTION B: Account name + key
+      - name: Enable static website + sync (account + key)
+        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING == '' && secrets.AZURE_STORAGE_ACCOUNT != '' && secrets.AZURE_STORAGE_KEY != '' }}
+        uses: azure/cli@v2
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+        with:
+          azcliversion: "2.61.0"
+          inlineScript: |
+            set -e
+            az storage blob service-properties update \
+              --account-name "$AZURE_STORAGE_ACCOUNT" \
+              --account-key "$AZURE_STORAGE_KEY" \
+              --static-website \
+              --index-document index.html \
+              --404-document 404.html
 
-            elif [ -n "$AZURE_STORAGE_ACCOUNT" ] && [ -n "$AZURE_STORAGE_KEY" ]; then
-              echo "Using account + key"
-              az storage blob service-properties update \
-                --account-name "$AZURE_STORAGE_ACCOUNT" \
-                --account-key "$AZURE_STORAGE_KEY" \
-                --static-website \
-                --index-document index.html \
-                --404-document 404.html
+            az storage blob sync \
+              --account-name "$AZURE_STORAGE_ACCOUNT" \
+              --account-key "$AZURE_STORAGE_KEY" \
+              -c '$web' \
+              -s ./out \
+              --delete-destination true
 
-              az storage blob sync \
-                --account-name "$AZURE_STORAGE_ACCOUNT" \
-                --accou
+      # OPTION C: Account name + SAS token (STATIC WEBSITE MUST ALREADY BE ENABLED)
+      - name: Sync only (account + SAS)
+        if: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING == '' && secrets.AZURE_STORAGE_ACCOUNT != '' && secrets.AZURE_STORAGE_SAS_TOKEN != '
