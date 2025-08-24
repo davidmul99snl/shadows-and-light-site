@@ -1,47 +1,90 @@
-name: Deploy to Azure Storage Static Website
+name: Deploy to Azure Static Website
+
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   workflow_dispatch:
 
+concurrency:
+  group: azure-static-website
+  cancel-in-progress: true
+
 jobs:
-      
-  build_and_upload:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node 18
+      # Optional Next.js build cache (speeds up lint/compile)
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-next-
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 18
+          cache: 'npm'
 
-      - name: Install deps
-        run: npm install
-      
-      - name: Make public folder
-        run: mkdir -p public
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Fetch home hero
-        run: curl -fsSL -o public/hero-home.jpg 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg012.jpg'
+      # Run the generator explicitly (in case prebuild script isn't set)
+      - name: Generate media JSON (audio/videos)
+        run: |
+          if [ -f scripts/generateMedia.cjs ]; then
+            node scripts/generateMedia.cjs
+          else
+            echo "scripts/generateMedia.cjs not found — skipping generator."
+          fi
 
-      - name: Copy about + contact hero (same art as home)
-        run: cp public/hero-home.jpg public/hero-about.jpg && cp public/hero-home.jpg public/hero-contact.jpg
-
-      - name: Fetch press hero
-        run: curl -fsSL -o public/hero-press.jpg 'https://shadowsandlightmusic.com/wp-content/uploads/2015/12/featureimg041.jpg'
-
-      - name: Fetch live photo
-        run: curl -fsSL -o public/live.jpg 'https://shadowsandlightmusic.com/wp-content/uploads/2020/01/shadows-and-light-colour-naul-2018-hi-res.jpg'
-      - name: Build (Next static export)
+      # Build. With next.config.js { output: 'export' } this creates ./out
+      - name: Build (Next.js static export via output:'export')
         run: npm run build
 
-      - name: Verify out folder exists
-        run: ls -la out || (echo "No out directory found" && exit 1)
+      - name: Verify build output exists
+        run: |
+          test -d out && echo "✅ out/ exists" || (echo "❌ out/ not found"; exit 1)
 
-      - name: Upload to $web
+      # Azure CLI for storage sync
+      - name: Setup Azure CLI
         uses: azure/cli@v2
-        with:
-          inlineScript: az storage blob upload-batch --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --destination '$web' --source ./out --sas-token "${{ secrets.AZURE_STORAGE_SAS }}" --overwrite
+
+      - name: Enable Static Website (idempotent)
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        run: |
+          az storage blob service-properties update \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --static-website \
+            --index-document index.html \
+            --404-document 404.html
+
+      - name: Sync ./out to $web
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        run: |
+          az storage blob sync \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            -c '$web' \
+            -s ./out \
+            --delete
+
+      # Optional: fix common content-types (only if you notice octet-stream)
+      # - name: Normalize content-types (optional)
+      #   env:
+      #     AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      #   run: |
+      #     set -e
+      #     # mp3
+      #     az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix audio/ --output tsv --query "[].name" | \
+      #       xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "audio/mpeg"
+      #     # mp4
+      #     az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix video/ --output tsv --query "[].name" | \
+      #       xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "video/mp4"
