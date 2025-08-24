@@ -17,25 +17,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Optional Next.js build cache (speeds up lint/compile)
-      - name: Cache Next.js build cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-next-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-next-
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          # NOTE: do NOT set "cache: npm" here — it requires a lockfile and will error
 
-      - name: Install dependencies
-        run: npm ci
+      # Optional Next.js build cache (safe even without a lockfile)
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-next-
 
-      # Run the generator explicitly (in case prebuild script isn't set)
+      - name: Install dependencies (works with or without lockfile)
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "Using npm ci (lockfile present)"
+            npm ci
+          else
+            echo "No lockfile found — using npm install"
+            npm install
+          fi
+
+      # Run the generator explicitly (in case you didn't add "prebuild" in package.json)
       - name: Generate media JSON (audio/videos)
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
@@ -52,7 +59,6 @@ jobs:
         run: |
           test -d out && echo "✅ out/ exists" || (echo "❌ out/ not found"; exit 1)
 
-      # Azure CLI for storage sync
       - name: Setup Azure CLI
         uses: azure/cli@v2
 
@@ -76,15 +82,13 @@ jobs:
             -s ./out \
             --delete
 
-      # Optional: fix common content-types (only if you notice octet-stream)
+      # Optional: normalize content-types if Azure set octet-stream
       # - name: Normalize content-types (optional)
       #   env:
       #     AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
       #   run: |
       #     set -e
-      #     # mp3
       #     az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix audio/ --output tsv --query "[].name" | \
       #       xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "audio/mpeg"
-      #     # mp4
       #     az storage blob list --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' --prefix video/ --output tsv --query "[].name" | \
       #       xargs -I {} az storage blob update --connection-string "$AZURE_STORAGE_CONNECTION_STRING" -c '$web' -n "{}" --content-type "video/mp4"
