@@ -5,20 +5,9 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-concurrency:
-  group: azure-static-website
-  cancel-in-progress: true
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
-    # Make secrets available via env for conditions & scripts
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-      AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-      AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-      AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
 
     steps:
       - name: Checkout
@@ -29,101 +18,51 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies (works with or without lockfile)
+      - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
-            echo "Using npm ci (lockfile present)"
             npm ci
           else
-            echo "No lockfile found — using npm install"
             npm install
           fi
 
-      - name: Generate media JSON (audio/videos)
+      # Optional: generate JSON (only if you added scripts/generateMedia.cjs)
+      - name: Generate media JSON
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
             node scripts/generateMedia.cjs
           else
-            echo "scripts/generateMedia.cjs not found — skipping generator."
+            echo "No generator script found — skipping."
           fi
 
-      # With next.config.js { output: "export" }, this produces ./out
+      # With next.config.js { output: 'export' }, this creates ./out
       - name: Build (Next.js static export)
         run: npm run build
 
-      - name: Verify build output exists
-        run: |
-          test -d out && echo "✅ out/ exists" || (echo "❌ out/ not found"; exit 1)
+      - name: Verify build output
+        run: test -d out
 
-      # --- Azure upload using ONE of three credential options ---
-
-      # OPTION A: Connection string (recommended)
-      - name: Enable static website + sync (connection string)
-        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING != '' }}
+      - name: Upload to Azure Static Website
         uses: azure/cli@v2
         env:
-          AZURE_STORAGE_CONNECTION_STRING: ${{ env.AZURE_STORAGE_CONNECTION_STRING }}
+          # Provide ONE of these in repo Settings → Secrets and variables → Actions
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }} # no leading '?'
         with:
           azcliversion: "2.61.0"
           inlineScript: |
-            set -e
+            set -euo pipefail
+            # Azure CLI will pick credentials from env automatically.
+            # Try enabling static website (skip errors e.g., when using SAS):
             az storage blob service-properties update \
-              --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
               --static-website \
               --index-document index.html \
-              --404-document 404.html
+              --404-document 404.html || true
 
+            # Sync build output to $web
             az storage blob sync \
-              --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
               -c '$web' \
               -s ./out \
               --delete-destination true
-
-      # OPTION B: Account name + key
-      - name: Enable static website + sync (account + key)
-        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING == '' && env.AZURE_STORAGE_ACCOUNT != '' && env.AZURE_STORAGE_KEY != '' }}
-        uses: azure/cli@v2
-        env:
-          AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ env.AZURE_STORAGE_KEY }}
-        with:
-          azcliversion: "2.61.0"
-          inlineScript: |
-            set -e
-            az storage blob service-properties update \
-              --account-name "$AZURE_STORAGE_ACCOUNT" \
-              --account-key "$AZURE_STORAGE_KEY" \
-              --static-website \
-              --index-document index.html \
-              --404-document 404.html
-
-            az storage blob sync \
-              --account-name "$AZURE_STORAGE_ACCOUNT" \
-              --account-key "$AZURE_STORAGE_KEY" \
-              -c '$web' \
-              -s ./out \
-              --delete-destination true
-
-      # OPTION C: Account name + SAS token (STATIC WEBSITE MUST ALREADY BE ENABLED)
-      - name: Sync only (account + SAS)
-        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING == '' && env.AZURE_STORAGE_ACCOUNT != '' && env.AZURE_STORAGE_SAS_TOKEN != '' }}
-        uses: azure/cli@v2
-        env:
-          AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ env.AZURE_STORAGE_SAS_TOKEN }}
-        with:
-          azcliversion: "2.61.0"
-          inlineScript: |
-            set -e
-            # Strip leading '?' if present
-            sas="${AZURE_STORAGE_SAS_TOKEN#\?}"
-            az storage blob sync \
-              --account-name "$AZURE_STORAGE_ACCOUNT" \
-              --sas-token "$sas" \
-              -c '$web' \
-              -s ./out \
-              --delete-destination true
-
-      # If none of the above ran, fail with a clear message
-      - name: Fail if no Azure credentials provided
-        if: ${{ env.AZURE_STORAGE_CONNECTION_STRING == '' && (env.AZURE_STORAGE_ACCOUNT == '_
