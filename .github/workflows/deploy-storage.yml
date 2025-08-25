@@ -9,6 +9,13 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # Map secrets (set ONE of these in repo Settings → Secrets and variables → Actions)
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+      AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+      AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}  # If using SAS, store it WITHOUT leading '?'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,7 +33,7 @@ jobs:
             npm install
           fi
 
-      # Optional: generate JSON (only if you added scripts/generateMedia.cjs)
+      # Optional: generate JSON from /public/audio and /public/video
       - name: Generate media JSON
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
@@ -42,27 +49,41 @@ jobs:
       - name: Verify build output
         run: test -d out
 
-      - name: Upload to Azure Static Website
+      - name: Upload to Azure Static Website (no azcopy)
         uses: azure/cli@v2
-        env:
-          # Provide ONE of these in repo Settings → Secrets and variables → Actions
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }} # no leading '?'
         with:
           azcliversion: "2.61.0"
           inlineScript: |
             set -euo pipefail
-            # Azure CLI will pick credentials from env automatically.
-            # Try enabling static website (skip errors e.g., when using SAS):
+
+            # 1) Do NOT use azcopy. Force CLI to use Python SDK.
+            export AZURE_STORAGE_USE_AZCOPY=false
+
+            # 2) Enable static website (ignore if creds are SAS-only or already set)
             az storage blob service-properties update \
               --static-website \
               --index-document index.html \
               --404-document 404.html || true
 
-            # Sync build output to $web
-            az storage blob sync \
-              -c '$web' \
-              -s ./out \
-              --delete-destination true
+            # 3) Upload everything (overwrite changed files)
+            az storage blob upload-batch \
+              --destination '$web' \
+              --source ./out \
+              --overwrite true
+
+            # 4) Delete remote files that don’t exist locally (simulate sync delete)
+            #    Build local file list (relative paths) and remote blob list, then delete the diff.
+            tmp_local=$(mktemp)
+            tmp_remote=$(mktemp)
+
+            (cd out && find . -type f -print | sed 's#^\./##' | sort) > "$tmp_local"
+            az storage blob list -c '$web' --query "[].name" -o tsv | sort > "$tmp_remote" || true
+
+            # Remove remote blobs not present locally
+            comm -23 "$tmp_remote" "$tmp_local" | while IFS= read -r blob; do
+              [ -z "$blob" ] && continue
+              echo "Deleting obsolete blob: $blob"
+              az storage blob delete -c '$web' -n "$blob" --only-show-errors || true
+            done
+
+            rm -f "$tmp_local" "$tmp_remote"
