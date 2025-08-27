@@ -1,5 +1,5 @@
 // pages/media.jsx
-import itemsData from "../site-data/media.json"; // <-- UPDATED PATH
+import itemsData from "..public/site-data/media.json"; // <-- UPDATED PATH
 
 export default function Media() {
   const items = Array.isArray(itemsData) ? itemsData : [];
@@ -18,8 +18,8 @@ export default function Media() {
           <div className="empty">
             <h3>No media found</h3>
             <p>
-              I looked for <code>/site-data/media.json</code> and it has no playable items.
-              Add files under <code>/public/audio</code> or <code>/public/video</code> and list them in <code>/site-data/media.json</code>.
+              I looked for <code>/public/site-data/media.json</code> and it has no playable items.
+              Add files under <code>/public/audio</code> or <code>/public/video</code> and list them in <code>/public/site-data/media.json</code>.
             </p>
             <details>
               <summary>Quick example</summary>
