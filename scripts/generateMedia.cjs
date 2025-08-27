@@ -8,7 +8,7 @@ const PUBLIC = path.join(ROOT, "public");
 const SITE_DATA = path.join(PUBLIC, "site-data");
 
 const AUDIO_DIR = path.join(PUBLIC, "audio");
-const VIDEO_DIR = path.join(PUBLIC, "video");
+const VIDEO_DIR = path.join(PUBLIC, "videos");
 
 const AUDIO_JSON = path.join(SITE_DATA, "audio.json");
 const VIDEOS_JSON = path.join(SITE_DATA, "videos.json");
