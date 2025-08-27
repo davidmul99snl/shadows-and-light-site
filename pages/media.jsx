@@ -41,7 +41,7 @@ export default function Media({ audio = [], videos = [], photos = [] }) {
 
         {/* Video */}
         <section style={{ marginTop: "2rem" }}>
-          <h2>Video</h2>
+          <h2>Videos</h2>
           {videos.length === 0 ? (
             <p>No videos yet.</p>
           ) : (
