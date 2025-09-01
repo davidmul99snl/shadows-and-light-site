@@ -42,8 +42,11 @@ export default function Media({ videos = [], audios = [] }) {
       {videos.map((v, idx) => (
         <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
           
-          {/* Aspect-ratio wrapper: fixed 16:9 for ALL items */}
-<div className="relative w-full pt-[56.25%] overflow-hidden rounded-xl shadow-sm">
+{/* Fixed 16:9 wrapper — plugin-free */}
+<div
+  className="relative w-full overflow-hidden rounded-xl shadow-sm bg-black"
+  style={{ paddingTop: '56.25%' }}  // 9/16 = 0.5625
+>
   {v.embedUrl ? (
     <iframe
       className="absolute inset-0 w-full h-full"
@@ -59,13 +62,14 @@ export default function Media({ videos = [], audios = [] }) {
       controls
       playsInline
       preload="metadata"
-      className="absolute inset-0 w-full h-full object-contain bg-black"
+      className="absolute inset-0 w-full h-full object-contain"
       poster={v.poster || v.thumbnail}
     >
       <source src={v.src} type={v.type || "video/mp4"} />
     </video>
   )}
 </div>
+
 
           <div className="mt-3">
             <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
