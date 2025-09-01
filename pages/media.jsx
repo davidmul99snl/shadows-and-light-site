@@ -41,9 +41,9 @@ export default function Media({ videos = [], audios = [] }) {
     <ul className="grid gap-8 md:grid-cols-2">
       {videos.map((v, idx) => (
         <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
-          {/* Aspect ratio wrapper to prevent stretching */}
+          
           {/* Aspect-ratio wrapper: fixed 16:9 for ALL items */}
-<div className="relative aspect-video overflow-hidden rounded-xl shadow-sm">
+<div className="relative w-full pt-[56.25%] overflow-hidden rounded-xl shadow-sm">
   {v.embedUrl ? (
     <iframe
       className="absolute inset-0 w-full h-full"
