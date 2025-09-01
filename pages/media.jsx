@@ -21,7 +21,7 @@ export default function Media({ videos = [], audios = [] }) {
         <title>Music &amp; Video — Shadows &amp; Light</title>
         <meta
           name="description"
-          content="Listen and watch — updated via JSON files."
+          content="Watch and Listen"
         />
       </Head>
 
@@ -34,52 +34,58 @@ export default function Media({ videos = [], audios = [] }) {
         </p>
 
         {/* VIDEOS */}
-        {videos?.length > 0 && (
-          <section className="mt-8 space-y-8">
-            <h2 className="text-xl font-medium">Videos</h2>
+{videos?.length > 0 && (
+  <section className="mt-8 space-y-8">
+    <h2 className="text-xl font-medium">Videos</h2>
 
-            <ul className="grid gap-8 md:grid-cols-2">
-              {videos.map((v, idx) => (
-                <li key={v.id ?? idx} className="flex flex-col">
-                  {/* Aspect ratio wrapper to prevent stretching */}
-                  <div
-                    className={v?.aspectRatio ? undefined : "aspect-video"}
-                    style={
-                      v?.aspectRatio
-                        ? { aspectRatio: v.aspectRatio } // e.g., "4 / 3", "16 / 9", "9 / 16"
-                        : undefined
-                    }
-                  >
-                    <video
-                      controls
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-contain rounded-xl shadow-sm"
-                      src={v.src}
-                      poster={v.poster}
-                    />
-                  </div>
+    <ul className="grid gap-8 md:grid-cols-2">
+      {videos.map((v, idx) => (
+        <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
+          {/* Aspect ratio wrapper to prevent stretching */}
+          <div
+            className={v?.aspectRatio ? undefined : "aspect-video"}
+            style={v?.aspectRatio ? { aspectRatio: v.aspectRatio } : undefined}
+          >
+            {v.embedUrl ? (
+              // YouTube (embed)
+              <iframe
+                className="absolute inset-0 w-full h-full rounded-xl shadow-sm"
+                src={v.embedUrl}
+                title={v.title || "YouTube video"}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            ) : (
+              // Local file
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full h-full object-contain rounded-xl shadow-sm"
+                poster={v.poster || v.thumbnail}
+              >
+                <source src={v.src} type={v.type || "video/mp4"} />
+                Sorry, your browser can’t play this video.
+              </video>
+            )}
+          </div>
 
-                  <div className="mt-3">
-                    <h3 className="text-base font-medium">
-                      {v.title ?? "Untitled"}
-                    </h3>
-                    {v.description && (
-                      <p className="mt-1 text-sm text-neutral-600">
-                        {v.description}
-                      </p>
-                    )}
-                    {v.credit && (
-                      <p className="mt-1 text-xs text-neutral-500">
-                        {v.credit}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+          <div className="mt-3">
+            <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
+            {v.description && (
+              <p className="mt-1 text-sm text-neutral-600">{v.description}</p>
+            )}
+            {v.credit && (
+              <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
 
         {/* AUDIO */}
         {audios?.length > 0 && (
