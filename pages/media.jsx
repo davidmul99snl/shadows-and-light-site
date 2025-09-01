@@ -42,35 +42,30 @@ export default function Media({ videos = [], audios = [] }) {
       {videos.map((v, idx) => (
         <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
           {/* Aspect ratio wrapper to prevent stretching */}
-          <div
-            className={v?.aspectRatio ? undefined : "aspect-video"}
-            style={v?.aspectRatio ? { aspectRatio: v.aspectRatio } : undefined}
-          >
-            {v.embedUrl ? (
-              // YouTube (embed)
-              <iframe
-                className="absolute inset-0 w-full h-full rounded-xl shadow-sm"
-                src={v.embedUrl}
-                title={v.title || "YouTube video"}
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            ) : (
-              // Local file
-              <video
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full h-full object-contain rounded-xl shadow-sm"
-                poster={v.poster || v.thumbnail}
-              >
-                <source src={v.src} type={v.type || "video/mp4"} />
-                Sorry, your browser can’t play this video.
-              </video>
-            )}
-          </div>
+          {/* Aspect-ratio wrapper: fixed 16:9 for ALL items */}
+<div className="relative aspect-video overflow-hidden rounded-xl shadow-sm">
+  {v.embedUrl ? (
+    <iframe
+      className="absolute inset-0 w-full h-full"
+      src={v.embedUrl}
+      title={v.title || "YouTube video"}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+      referrerPolicy="strict-origin-when-cross-origin"
+    />
+  ) : (
+    <video
+      controls
+      playsInline
+      preload="metadata"
+      className="absolute inset-0 w-full h-full object-contain bg-black"
+      poster={v.poster || v.thumbnail}
+    >
+      <source src={v.src} type={v.type || "video/mp4"} />
+    </video>
+  )}
+</div>
 
           <div className="mt-3">
             <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
