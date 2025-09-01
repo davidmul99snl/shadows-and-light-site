@@ -1,7 +1,14 @@
 // scripts/generateMedia.cjs
-/* Generate /public/site-data/{audio.json,videos.json} from files in
-   /public/audio and /public/videos. Preserves existing embed entries
-   in videos.json and merges extra fields (poster, captions, etc.).
+/* Generates /public/site-data/{audio.json,videos.json}
+   - Locals: from /public/audio/** and /public/videos/**
+   - Embeds: from /public/site-data/videos.embeds.json (optional)
+   - Outputs a unified videos.json containing both local and embedded videos.
+
+   Local item shape:
+     { kind: "local", title, src, type }
+
+   Embed (YouTube) item shape:
+     { kind: "embed", provider: "youtube", title, videoId, embedUrl, thumbnail, order }
 */
 
 const fs = require('fs');
@@ -10,14 +17,16 @@ const path = require('path');
 
 const ROOT = process.cwd();
 const PUB = path.join(ROOT, 'public');
-const AUDIO_DIR = path.join(PUB, 'audio');   // ← audio
-const VIDEO_DIR = path.join(PUB, 'videos');  // ← videos (plural)
+const AUDIO_DIR = path.join(PUB, 'audio');
+const VIDEO_DIR = path.join(PUB, 'videos'); // IMPORTANT: plural
 const SITE_DATA = path.join(PUB, 'site-data');
+
 const AUDIO_JSON = path.join(SITE_DATA, 'audio.json');
 const VIDEOS_JSON = path.join(SITE_DATA, 'videos.json');
+const EMBEDS_JSON = path.join(SITE_DATA, 'videos.embeds.json'); // optional
 
 const AUDIO_EXTS = new Set(['.mp3', '.m4a', '.aac', '.wav', '.ogg', '.opus', '.flac']);
-const VIDEO_EXTS = new Set(['.mp4', '.m4v', '.webm', '.ogv', '.ogg', '.mov']); // .mov may not stream everywhere
+const VIDEO_EXTS = new Set(['.mp4', '.m4v', '.webm', '.ogv', '.ogg', '.mov']);
 
 const EXT_MIME = {
   // audio
@@ -33,12 +42,11 @@ const EXT_MIME = {
   '.m4v': 'video/mp4',
   '.webm': 'video/webm',
   '.ogv': 'video/ogg',
-  '.mov': 'video/quicktime',
-  '.ogg': 'video/ogg'
+  '.ogg': 'video/ogg',
+  '.mov': 'video/quicktime'
 };
 
 function toTitle(name) {
-  // turn "our-favorites" -> "Our Favorites"
   return name
     .replace(/[-_]+/g, ' ')
     .replace(/\s+/g, ' ')
@@ -54,7 +62,7 @@ function toPosix(p) {
   return p.split(path.sep).join('/');
 }
 
-async function listRecursive(baseDir, allowed) {
+async function listRecursive(baseDir, allowedExts) {
   const out = [];
   async function walk(dir) {
     let entries = [];
@@ -69,7 +77,7 @@ async function listRecursive(baseDir, allowed) {
         await walk(full);
       } else if (d.isFile()) {
         const ext = path.extname(d.name).toLowerCase();
-        if (allowed.has(ext)) {
+        if (allowedExts.has(ext)) {
           const rel = toPosix(path.relative(baseDir, full));
           out.push(rel);
         }
@@ -93,65 +101,113 @@ function mimeFor(ext, fallback) {
   return EXT_MIME[ext] || fallback;
 }
 
+function youtubeIdFromUrl(u) {
+  try {
+    const url = new URL(u);
+    if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
+    if (url.hostname.includes('youtube.com')) return url.searchParams.get('v');
+  } catch {}
+  return null;
+}
+
+function normalizeEmbed(e) {
+  const provider = (e.provider || 'youtube').toLowerCase();
+  if (provider !== 'youtube') return null; // currently only YouTube supported
+
+  const id = e.videoId || (e.url ? youtubeIdFromUrl(e.url) : null);
+  if (!id) return null;
+
+  const title = e.title || 'YouTube Video';
+  const order = e.order ?? 0;
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`;
+  const thumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+
+  // Allow extra fields (description, poster, etc.) to pass through
+  const extra = { ...e };
+  delete extra.videoId; delete extra.url; delete extra.provider; delete extra.title; delete extra.order;
+
+  return {
+    kind: 'embed',
+    provider: 'youtube',
+    title,
+    videoId: id,
+    embedUrl,
+    thumbnail,
+    order,
+    ...extra
+  };
+}
+
 function mergeExtras(existing, fresh) {
-  // Merge "extras" from an existing item into fresh (poster, captions, etc.)
-  const keep = [
-    'poster', 'captions', 'subtitles', 'thumbnail',
-    'description', 'credit', 'width', 'height', 'duration'
-  ];
+  // Copy selected fields from existing item into fresh if fresh lacks them
+  const keep = ['poster', 'captions', 'subtitles', 'thumbnail', 'description', 'credit', 'width', 'height', 'duration'];
   for (const k of keep) {
-    if (existing[k] != null && fresh[k] == null) fresh[k] = existing[k];
+    if (existing && existing[k] != null && fresh[k] == null) fresh[k] = existing[k];
   }
   return fresh;
 }
 
+function sortMedia(a, b) {
+  const oa = a.order ?? 1000;
+  const ob = b.order ?? 1000;
+  if (oa !== ob) return oa - ob;
+  const ta = (a.title || '').toLowerCase();
+  const tb = (b.title || '').toLowerCase();
+  return ta.localeCompare(tb);
+}
+
 async function main() {
   console.log('🔧 Generating site-data from /public/audio and /public/videos...');
-
   await ensureDir(SITE_DATA);
 
-  // AUDIO (local files only)
+  // AUDIO
   const audioFiles = await listRecursive(AUDIO_DIR, AUDIO_EXTS);
   const audioItems = audioFiles.map(rel => {
     const ext = path.extname(rel).toLowerCase();
-    const base = path.parse(rel).name;
-    const title = toTitle(base);
-    const src = encodeURI(`/audio/${rel}`); // keep spaces via %20
+    const title = toTitle(path.parse(rel).name);
+    const src = encodeURI(`/audio/${rel}`); // keep spaces encoded
     return { title, src, type: mimeFor(ext, 'audio/mpeg') };
   });
 
-  // VIDEOS (local files + preserve embeds from existing videos.json)
+  // VIDEOS (locals)
   const videoFiles = await listRecursive(VIDEO_DIR, VIDEO_EXTS);
-  const localVideoItems = videoFiles.map(rel => {
+  const localItems = videoFiles.map(rel => {
     const ext = path.extname(rel).toLowerCase();
-    const base = path.parse(rel).name;
-    const title = toTitle(base);
+    const title = toTitle(path.parse(rel).name);
     const src = encodeURI(`/videos/${rel}`); // IMPORTANT: /videos/
-    return { title, src, type: mimeFor(ext, 'video/mp4') };
+    return { kind: 'local', title, src, type: mimeFor(ext, 'video/mp4') };
   });
 
+  // Existing videos.json (to preserve any extras you previously hand-added)
   const existingVideos = (await readJsonIfExists(VIDEOS_JSON)) || [];
-  const embeds = existingVideos.filter(v => v && (v.embedUrl || v.type === 'embed' || v.kind === 'embed'));
-
-  // Merge extras for locals that already existed
-  const existingBySrc = new Map(
-    existingVideos.filter(v => v && v.src).map(v => [v.src, v])
+  const existingByKey = new Map(
+    existingVideos.map(v => {
+      // Use src for locals, embedUrl for embeds as key
+      const key = v.kind === 'embed' ? v.embedUrl : v.src;
+      return [key, v];
+    })
   );
 
-  const mergedLocals = localVideoItems.map(v => {
-    const prev = existingBySrc.get(v.src);
-    return prev ? mergeExtras(prev, v) : v;
-  });
+  // EMBEDS (optional)
+  const embedsRaw = (await readJsonIfExists(EMBEDS_JSON)) || [];
+  const embedItems = []
+    .concat(Array.isArray(embedsRaw) ? embedsRaw : [embedsRaw])
+    .map(normalizeEmbed)
+    .filter(Boolean);
 
-  // Final list: embeds first (preserved order), then locals
-  const videos = [...embeds, ...mergedLocals];
+  // Merge extras from previous videos.json if available
+  const mergedLocals = localItems.map(v => mergeExtras(existingByKey.get(v.src), v));
+  const mergedEmbeds = embedItems.map(e => mergeExtras(existingByKey.get(e.embedUrl), e));
+
+  // Final list: embeds + locals, sorted by order then title
+  const videos = [...mergedEmbeds, ...mergedLocals].sort(sortMedia);
 
   // WRITE
   await fsp.writeFile(AUDIO_JSON, JSON.stringify(audioItems, null, 2) + '\n');
   await fsp.writeFile(VIDEOS_JSON, JSON.stringify(videos, null, 2) + '\n');
 
   console.log(`✅ Wrote ${AUDIO_JSON} (${audioItems.length} items)`);
-  console.log(`✅ Wrote ${VIDEOS_JSON} (${videos.length} items: ${embeds.length} embed(s), ${mergedLocals.length} local)`);
+  console.log(`✅ Wrote ${VIDEOS_JSON} (${videos.length} items: ${mergedEmbeds.length} embed(s), ${mergedLocals.length} local)`);
 }
 
 main().catch(err => {
