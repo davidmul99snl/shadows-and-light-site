@@ -1,28 +1,30 @@
-{
-  "kind": "embed",
-  "provider": "youtube",
-  "title": "In France They Kiss on Main Street",
-  "videoId": "KzA8yRLyJOc&list",
-  "order": 1
-}
-{
-  "kind": "embed",
-  "provider": "youtube",
-  "title": "A Case of You (Belfast Cathedral culture Night)",
-  "videoId": "v5fRi9kyWJw",
-  "order": 2
-}
-{
-  "kind": "embed",
-  "provider": "youtube",
-  "title": "Both Sides Now",
-  "videoId": "9CfOa1C6Svk",
-  "order": 3
-}
-{
-  "kind": "embed",
-  "provider": "youtube",
-  "title": "Hejira",
-  "videoId": "1LG_AiboElI",
-  "order": 4
-}
+[
+  {
+    "kind": "embed",
+    "provider": "youtube",
+    "title": "In France They Kiss on Main Street",
+    "videoId": "KzA8yRLyJOc",
+    "order": 1
+  },
+  {
+    "kind": "embed",
+    "provider": "youtube",
+    "title": "A Case of You (Belfast Cathedral Culture Night)",
+    "videoId": "v5fRi9kyWJw",
+    "order": 2
+  },
+  {
+    "kind": "embed",
+    "provider": "youtube",
+    "title": "Both Sides Now",
+    "videoId": "9CfOa1C6Svk",
+    "order": 3
+  },
+  {
+    "kind": "embed",
+    "provider": "youtube",
+    "title": "Hejira",
+    "videoId": "1LG_AiboElI",
+    "order": 4
+  }
+]
