@@ -5,16 +5,20 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+concurrency:
+  group: storage-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    # Map secrets (set ONE of these in repo Settings → Secrets and variables → Actions)
+    # Use whichever of these you’ve set in repo Settings → Secrets → Actions
     env:
       AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
       AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
       AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-      AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}  # If using SAS, store it WITHOUT leading '?'
+      AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}  # If using SAS, store WITHOUT leading '?'
 
     steps:
       - name: Checkout
@@ -24,6 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies
         run: |
@@ -33,7 +38,7 @@ jobs:
             npm install
           fi
 
-      # Optional: generate JSON from /public/audio and /public/video
+      # Generate JSON from /public/audio and /public/videos (plural)
       - name: Generate media JSON
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
@@ -56,34 +61,48 @@ jobs:
           inlineScript: |
             set -euo pipefail
 
-            # 1) Do NOT use azcopy. Force CLI to use Python SDK.
+            # 1) Do NOT use azcopy; stick to Python SDK path for consistency
             export AZURE_STORAGE_USE_AZCOPY=false
 
-            # 2) Enable static website (ignore if creds are SAS-only or already set)
+            # 2) Enable static website (idempotent)
             az storage blob service-properties update \
               --static-website \
               --index-document index.html \
               --404-document 404.html || true
 
-            # 3) Upload everything (overwrite changed files)
+            # 3) Upload changed files
             az storage blob upload-batch \
               --destination '$web' \
               --source ./out \
               --overwrite true
 
-            # 4) Delete remote files that don’t exist locally (simulate sync delete)
-            #    Build local file list (relative paths) and remote blob list, then delete the diff.
+            # 4) Delete remote files that no longer exist locally
             tmp_local=$(mktemp)
             tmp_remote=$(mktemp)
-
             (cd out && find . -type f -print | sed 's#^\./##' | sort) > "$tmp_local"
             az storage blob list -c '$web' --query "[].name" -o tsv | sort > "$tmp_remote" || true
-
-            # Remove remote blobs not present locally
             comm -23 "$tmp_remote" "$tmp_local" | while IFS= read -r blob; do
               [ -z "$blob" ] && continue
               echo "Deleting obsolete blob: $blob"
               az storage blob delete -c '$web' -n "$blob" --only-show-errors || true
             done
-
             rm -f "$tmp_local" "$tmp_remote"
+
+            # 5) Ensure correct Content-Types for common media (avoid application/octet-stream)
+            fix_type () {
+              local pattern="$1"; local ctype="$2"
+              # Find matching local files and set the corresponding blob's content-type
+              find out -type f -name "$pattern" -print0 | while IFS= read -r -d '' f; do
+                blob="${f#out/}"
+                echo "Setting Content-Type '$ctype' on: $blob"
+                az storage blob update -c '$web' -n "$blob" --content-type "$ctype" --only-show-errors || true
+              done
+            }
+            fix_type "*.mp4"  "video/mp4"
+            fix_type "*.m4v"  "video/mp4"
+            fix_type "*.webm" "video/webm"
+            fix_type "*.ogv"  "video/ogg"
+            fix_type "*.mp3"  "audio/mpeg"
+            fix_type "*.m4a"  "audio/mp4"
+            fix_type "*.ogg"  "audio/ogg"
+            fix_type "*.opus" "audio/opus"
