@@ -27,44 +27,36 @@ img { max-width: 100%; display: block; }
   radial-gradient(50% 50% at 80% 30%, var(--gold) 0%, transparent 60%);
 }
 
-/* Gigs */
+/* --- Media thumbnails (final) --- */
+/* Grid of fixed-width tiles (≈25 characters). Tiles don’t scale; column count changes responsively. */
+ul.media-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(25ch, 25ch));
+  gap: 1.5rem;
+  justify-content: center;
+}
 
-/* Uniform 16:9 media tiles (matches your current DOM structure) */
-ul.md\:grid-cols-2 > li.flex.flex-col > div:first-child{
+/* 16:9 tile container */
+ul.media-grid > li > .media-tile{
   position: relative;
   width: 100%;
-  padding-top: 56.25%;       /* 16:9 */
+  padding-top: 56.25%;    /* 16:9 */
   overflow: hidden;
   background: #000;
-  border-radius: 0.75rem;
+  border-radius: 0.75rem; /* ~rounded-xl */
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
-ul.md\:grid-cols-2 > li.flex.flex-col > div:first-child > video,
-ul.md\:grid-cols-2 > li.flex.flex-col > div:first-child > iframe{
+
+/* Media element fills the tile */
+ul.media-grid > li > .media-tile > .media-frame{
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;        /* use 'cover' to crop-fill instead */
+  display: block;
 }
 
-/* Force local <video> to fill the 16:9 tile exactly (override any old styles) */
-.media-tile > video.media-frame{
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;  /* use cover if you want crop-to-fill */
-  max-width: none !important;
-  max-height: none !important;
-  display: block !important;
-}
-
-/* (Also apply to iframes for symmetry; harmless if already correct) */
-.media-tile > iframe.media-frame{
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
+/* Local <video> letterboxes to fit; change to 'cover' to crop-fill */
+ul.media-grid > li > .media-tile > video.media-frame{
+  object-fit: contain;
 }
