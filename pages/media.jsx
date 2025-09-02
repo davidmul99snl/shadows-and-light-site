@@ -28,23 +28,20 @@ export default function Media({ videos = [], audios = [] }) {
           Listen and watch — updated via JSON files.
         </p>
 
-        {/* VIDEOS */}
+{/* VIDEOS */}
 {videos?.length > 0 && (
   <section className="mt-8 space-y-6">
     <h2 className="text-xl font-medium">Videos</h2>
 
-    {/* Fixed-size columns: 25ch each, centered */}
-    <ul className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(25ch,25ch))] justify-center">
+    {/* Fixed-size thumbnail grid */}
+    <ul className="media-grid">
       {videos.map((v, idx) => (
         <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
-          {/* Fixed 16:9 tile that fills the 25ch column */}
-          <div
-            className="relative w-full overflow-hidden rounded-xl shadow-sm bg-black"
-            style={{ paddingTop: "56.25%" }}  /* 16:9 */
-          >
+          {/* Single, fixed 16:9 tile */}
+          <div className="media-tile">
             {v.embedUrl ? (
               <iframe
-                className="absolute inset-0 w-full h-full"
+                className="media-frame"
                 src={v.embedUrl}
                 title={v.title || "YouTube video"}
                 loading="lazy"
@@ -57,7 +54,7 @@ export default function Media({ videos = [], audios = [] }) {
                 controls
                 playsInline
                 preload="metadata"
-                className="absolute inset-0 w-full h-full object-contain"
+                className="media-frame object-contain"
                 poster={v.poster || v.thumbnail}
               >
                 <source src={v.src} type={v.type || "video/mp4"} />
