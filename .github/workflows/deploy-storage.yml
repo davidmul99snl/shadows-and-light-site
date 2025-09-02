@@ -24,6 +24,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create repo snapshot artifact
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts
+          echo "$GITHUB_SHA" > .artifacts/COMMIT.txt
+          git ls-tree -r --name-only HEAD | sort > .artifacts/TREE.txt
+          git archive -o .artifacts/repo-${GITHUB_SHA}.zip HEAD
+
+          # Minimal STATE.md with hashes of key files
+          {
+            echo "# Repo STATE"
+            echo
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Date: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo
+            echo "## Key files"
+            for f in package.json next.config.js scripts/generateMedia.cjs pages/media.jsx app/media/page.jsx styles/globals.css app/globals.css .github/workflows/deploy-storage.yml public/site-data/videos.embeds.json; do
+              if [ -f "$f" ]; then
+                printf -- "- %s (%s)\n" "$f" "$(sha256sum "$f" | cut -d' ' -f1)"
+              else
+                printf -- "- %s (missing)\n" "$f"
+              fi
+            done
+            echo
+            echo "## npm scripts"
+            if [ -f package.json ]; then
+              node -e "const s=require('./package.json').scripts||{}; for (const k of Object.keys(s)) console.log('-',k+':',s[k])"
+            fi
+          } > .artifacts/STATE.md
+
+      - name: Upload repo snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-snapshot-${{ github.sha }}
+          path: .artifacts/
+          if-no-files-found: error
+          retention-days: 45
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
