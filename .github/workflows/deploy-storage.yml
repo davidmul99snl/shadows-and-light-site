@@ -13,7 +13,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    # Use whichever of these you’ve set in repo Settings → Secrets → Actions
     env:
       AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
       AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
@@ -24,18 +23,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ---- Repo snapshot artifact (keeps exact source for each deploy) ----
+      # ---- Repo snapshot artifact ----
       - name: Create repo snapshot artifact
+        shell: bash
         run: |
-          set -euo pipefail
+          set -e
           mkdir -p .artifacts
-          echo "$GITHUB_SHA" > .artifacts/COMMIT.txt
-          git ls-tree -r --name-only HEAD | sort > .artifacts/TREE.txt
-          git archive -o .artifacts/repo-${GITHUB_SHA}.zip HEAD
+          # Commit/Tree manifests
+          git rev-parse HEAD > .artifacts/COMMIT.txt || echo "unknown" > .artifacts/COMMIT.txt
+          git ls-tree -r --name-only HEAD | sort > .artifacts/TREE.txt || touch .artifacts/TREE.txt
+          # Make a zip; fall back to zipping the working tree if git archive fails
+          ZIP_NAME="repo-${GITHUB_SHA:-head}.zip"
+          git archive -o ".artifacts/${ZIP_NAME}" HEAD || zip -yr ".artifacts/${ZIP_NAME}" .
+          # Minimal STATE.md (no Node required)
           {
             echo "# Repo STATE"
             echo
-            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Commit: ${GITHUB_SHA:-unknown}"
             echo "- Date: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             echo
             echo "## Key files"
@@ -46,22 +50,23 @@ jobs:
                 printf -- "- %s (missing)\n" "$f"
               fi
             done
-            echo
-            echo "## npm scripts"
-            if [ -f package.json ]; then
-              node -e "const s=require('./package.json').scripts||{}; for (const k of Object.keys(s)) console.log('-',k+':',s[k])"
-            fi
           } > .artifacts/STATE.md
+          echo "Created:"
+          ls -al .artifacts
 
       - name: Upload repo snapshot artifact
         uses: actions/upload-artifact@v4
         with:
           name: repo-snapshot-${{ github.sha }}
-          path: .artifacts/
+          path: |
+            .artifacts/COMMIT.txt
+            .artifacts/TREE.txt
+            .artifacts/STATE.md
+            .artifacts/repo-${{ github.sha }}.zip
           if-no-files-found: error
           retention-days: 45
 
-      # ---- Node setup / install (no cache to avoid lockfile requirement) ----
+      # ---- Node setup / install (no cache) ----
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -75,7 +80,7 @@ jobs:
             npm install
           fi
 
-      # ---- Generate site-data BEFORE build (scans /public/audio and /public/videos) ----
+      # ---- Generate site-data BEFORE build ----
       - name: Generate media JSON
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
@@ -84,7 +89,7 @@ jobs:
             echo "No generator script found - skipping."
           fi
 
-      # With next.config.js { output: 'export' }, this creates ./out
+      # Next.js static export should create ./out (next.config.js: output:'export')
       - name: Build (Next.js static export)
         run: npm run build
 
@@ -98,23 +103,17 @@ jobs:
           azcliversion: "2.61.0"
           inlineScript: |
             set -euo pipefail
-
-            # 1) Do NOT use azcopy; stick to Python SDK path for consistency
             export AZURE_STORAGE_USE_AZCOPY=false
-
-            # 2) Enable static website (idempotent; uses env creds)
             az storage blob service-properties update \
               --static-website \
               --index-document index.html \
               --404-document 404.html || true
 
-            # 3) Upload changed files
             az storage blob upload-batch \
               --destination '$web' \
               --source ./out \
               --overwrite true
 
-            # 4) Delete remote files that no longer exist locally
             tmp_local=$(mktemp)
             tmp_remote=$(mktemp)
             (cd out && find . -type f -print | sed 's#^\./##' | sort) > "$tmp_local"
@@ -126,7 +125,6 @@ jobs:
             done
             rm -f "$tmp_local" "$tmp_remote"
 
-            # 5) Ensure correct Content-Types for common media (avoid application/octet-stream)
             fix_type () {
               local pattern="$1"; local ctype="$2"
               find out -type f -name "$pattern" -print0 | while IFS= read -r -d '' f; do
