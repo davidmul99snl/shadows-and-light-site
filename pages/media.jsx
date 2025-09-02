@@ -29,56 +29,56 @@ export default function Media({ videos = [], audios = [] }) {
         </p>
 
         {/* VIDEOS */}
-        {videos?.length > 0 && (
-          <section className="mt-8 space-y-8">
-            <h2 className="text-xl font-medium">Videos</h2>
+{videos?.length > 0 && (
+  <section className="mt-8 space-y-6">
+    <h2 className="text-xl font-medium">Videos</h2>
 
-            <ul className="grid gap-8 md:grid-cols-2">
-              {videos.map((v, idx) => (
-                <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
-                  {/* Single fixed 16:9 wrapper for ALL items (no Tailwind plugin required) */}
-                  <div
-                    className="relative w-full overflow-hidden rounded-xl shadow-sm bg-black"
-                    style={{ paddingTop: "56.25%" }} // 16:9 = 9/16 = 0.5625
-                  >
-                    {v.embedUrl ? (
-                      <iframe
-                        className="absolute inset-0 w-full h-full"
-                        src={v.embedUrl}
-                        title={v.title || "YouTube video"}
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        referrerPolicy="strict-origin-when-cross-origin"
-                      />
-                    ) : (
-                      <video
-                        controls
-                        playsInline
-                        preload="metadata"
-                        className="absolute inset-0 w-full h-full object-contain"
-                        poster={v.poster || v.thumbnail}
-                      >
-                        <source src={v.src} type={v.type || "video/mp4"} />
-                        Sorry, your browser can’t play this video.
-                      </video>
-                    )}
-                  </div>
+    {/* Fixed-size columns: 25ch each, centered */}
+    <ul className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(25ch,25ch))] justify-center">
+      {videos.map((v, idx) => (
+        <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
+          {/* Fixed 16:9 tile that fills the 25ch column */}
+          <div
+            className="relative w-full overflow-hidden rounded-xl shadow-sm bg-black"
+            style={{ paddingTop: "56.25%" }}  /* 16:9 */
+          >
+            {v.embedUrl ? (
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src={v.embedUrl}
+                title={v.title || "YouTube video"}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            ) : (
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 w-full h-full object-contain"
+                poster={v.poster || v.thumbnail}
+              >
+                <source src={v.src} type={v.type || "video/mp4"} />
+              </video>
+            )}
+          </div>
 
-                  <div className="mt-3">
-                    <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
-                    {v.description && (
-                      <p className="mt-1 text-sm text-neutral-600">{v.description}</p>
-                    )}
-                    {v.credit && (
-                      <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+          <div className="mt-2">
+            <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
+            {v.description && (
+              <p className="mt-1 text-sm text-neutral-600">{v.description}</p>
+            )}
+            {v.credit && (
+              <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
 
         {/* AUDIO */}
         {audios?.length > 0 && (
