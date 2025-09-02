@@ -24,6 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ---- Repo snapshot artifact (keeps exact source for each deploy) ----
       - name: Create repo snapshot artifact
         run: |
           set -euo pipefail
@@ -31,8 +32,6 @@ jobs:
           echo "$GITHUB_SHA" > .artifacts/COMMIT.txt
           git ls-tree -r --name-only HEAD | sort > .artifacts/TREE.txt
           git archive -o .artifacts/repo-${GITHUB_SHA}.zip HEAD
-
-          # Minimal STATE.md with hashes of key files
           {
             echo "# Repo STATE"
             echo
@@ -62,6 +61,7 @@ jobs:
           if-no-files-found: error
           retention-days: 45
 
+      # ---- Node setup / install (no cache to avoid lockfile requirement) ----
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -75,13 +75,13 @@ jobs:
             npm install
           fi
 
-      # Generate JSON from /public/audio and /public/videos (plural)
+      # ---- Generate site-data BEFORE build (scans /public/audio and /public/videos) ----
       - name: Generate media JSON
         run: |
           if [ -f scripts/generateMedia.cjs ]; then
             node scripts/generateMedia.cjs
           else
-            echo "No generator script found — skipping."
+            echo "No generator script found - skipping."
           fi
 
       # With next.config.js { output: 'export' }, this creates ./out
@@ -91,6 +91,7 @@ jobs:
       - name: Verify build output
         run: test -d out
 
+      # ---- Deploy to Azure Static Website container ($web) ----
       - name: Upload to Azure Static Website (no azcopy)
         uses: azure/cli@v2
         with:
@@ -101,7 +102,7 @@ jobs:
             # 1) Do NOT use azcopy; stick to Python SDK path for consistency
             export AZURE_STORAGE_USE_AZCOPY=false
 
-            # 2) Enable static website (idempotent)
+            # 2) Enable static website (idempotent; uses env creds)
             az storage blob service-properties update \
               --static-website \
               --index-document index.html \
@@ -128,7 +129,6 @@ jobs:
             # 5) Ensure correct Content-Types for common media (avoid application/octet-stream)
             fix_type () {
               local pattern="$1"; local ctype="$2"
-              # Find matching local files and set the corresponding blob's content-type
               find out -type f -name "$pattern" -print0 | while IFS= read -r -d '' f; do
                 blob="${f#out/}"
                 echo "Setting Content-Type '$ctype' on: $blob"
