@@ -2,6 +2,8 @@ import Head from "next/head";
 import path from "path";
 import fs from "fs";
 
+const HERO = '/hero-giglive.jpg'
+
 export default function Gigs({ gigs }) {
   const list = Array.isArray(gigs) ? gigs : [];
   const sorted = [...list].sort((a, b) => {
