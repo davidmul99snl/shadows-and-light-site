@@ -25,7 +25,7 @@ export default function Media({ videos = [], audios = [] }) {
       <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Listen and watch — updated via JSON files.
+          Watch and Listen
         </p>
 
         {/* VIDEOS */}
