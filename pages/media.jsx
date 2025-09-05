@@ -1,4 +1,4 @@
-// pages/media.jsx
+'s // pages/media.jsx
 import Head from "next/head";
 import fs from "fs/promises";
 import path from "path";
@@ -36,7 +36,7 @@ export default function Media({ videos = [], audios = [] }) {
         <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Watch and Listen
+         A mixture of live and studio recordings
         </p>
         {/* VIDEOS */}
         {Array.isArray(videos) && videos.length > 0 && (
