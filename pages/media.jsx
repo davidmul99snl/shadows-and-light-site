@@ -3,6 +3,8 @@ import Head from "next/head";
 import fs from "fs/promises";
 import path from "path";
 
+const HERO = "/hero-media.jpg";
+
 // Read JSON from /public/site-data at build time
 async function readJsonFromPublic(filename) {
   try {
