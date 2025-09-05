@@ -24,11 +24,7 @@ export default function Media({ videos = [], audios = [] }) {
         <meta name="description" content="Watch and Listen" />
       </Head>
 
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          Watch and Listen
-        </p>
+      
   {/* Hero banner */}
         <div className="mt-6">
           <img
