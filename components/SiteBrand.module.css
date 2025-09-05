@@ -7,7 +7,7 @@
 
 .brand {
   display: inline-block;
-  font-size: clamp(22px, 3.2vw, 36px);
+  font-size: clamp(44px, 6.4vw, 72px);
   font-weight: 800;
   letter-spacing: .5px;
   background: linear-gradient(90deg, var(--indigo), #f2b5d4, var(--gold)); /* purple → cream */
