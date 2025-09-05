@@ -29,7 +29,15 @@ export default function Media({ videos = [], audios = [] }) {
         <p className="mt-2 text-sm text-neutral-600">
           Watch and Listen
         </p>
-
+  {/* Hero banner */}
+        <div className="mt-6">
+          <img
+            src={HERO}
+            alt="Shadows & Light live"
+            className="w-full h-auto rounded-xl shadow-sm"
+          />
+        </div>
+        
         {/* VIDEOS */}
         {Array.isArray(videos) && videos.length > 0 && (
           <section className="mt-8 space-y-6">
