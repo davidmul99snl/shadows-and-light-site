@@ -33,7 +33,11 @@ export default function Media({ videos = [], audios = [] }) {
             className="w-full h-auto rounded-xl shadow-sm"
           />
         </div>
-        
+        <main className="mx-auto max-w-4xl px-4 py-10">
+        <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
+        <p className="mt-2 text-sm text-neutral-600">
+          Watch and Listen
+        </p>
         {/* VIDEOS */}
         {Array.isArray(videos) && videos.length > 0 && (
           <section className="mt-8 space-y-6">
