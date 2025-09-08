@@ -66,11 +66,13 @@ jobs:
           if-no-files-found: error
           retention-days: 45
 
-      # ---- Node setup / install (no cache) ----
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+  uses: actions/setup-node@v4
+  with:
+    node-version: 18
+    cache: 'npm'                 # uses package-lock.json to key cache
+    cache-dependency-path: package-lock.json
+
 
       - name: Install dependencies
         run: |
@@ -88,6 +90,15 @@ jobs:
           else
             echo "No generator script found - skipping."
           fi
+
+- name: Restore Next.js build cache
+  uses: actions/cache@v4
+  with:
+    path: .next/cache
+    key: ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-${{ hashFiles('next.config.js') }}
+    restore-keys: |
+      ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-
+      ${{ runner.os }}-next-
 
       # Next.js static export should create ./out (next.config.js: output:'export')
       - name: Build (Next.js static export)
