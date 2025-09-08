@@ -29,13 +29,10 @@ jobs:
         run: |
           set -e
           mkdir -p .artifacts
-          # Commit/Tree manifests
           git rev-parse HEAD > .artifacts/COMMIT.txt || echo "unknown" > .artifacts/COMMIT.txt
           git ls-tree -r --name-only HEAD | sort > .artifacts/TREE.txt || touch .artifacts/TREE.txt
-          # Make a zip; fall back to zipping the working tree if git archive fails
           ZIP_NAME="repo-${GITHUB_SHA:-head}.zip"
           git archive -o ".artifacts/${ZIP_NAME}" HEAD || zip -yr ".artifacts/${ZIP_NAME}" .
-          # Minimal STATE.md (no Node required)
           {
             echo "# Repo STATE"
             echo
@@ -51,8 +48,7 @@ jobs:
               fi
             done
           } > .artifacts/STATE.md
-          echo "Created:"
-          ls -al .artifacts
+          echo "Created:"; ls -al .artifacts
 
       - name: Upload repo snapshot artifact
         uses: actions/upload-artifact@v4
@@ -66,21 +62,28 @@ jobs:
           if-no-files-found: error
           retention-days: 45
 
-      - name: Setup Node.js
-  uses: actions/setup-node@v4
-  with:
-    node-version: 18
-    cache: 'npm'                 # uses package-lock.json to key cache
-    cache-dependency-path: package-lock.json
+      # ---- Node setup (cache only if lockfile exists) ----
+      - name: Setup Node.js (with npm cache)
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: package-lock.json
 
+      - name: Setup Node.js (no cache)
+        if: ${{ hashFiles('package-lock.json') == '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
       - name: Install dependencies
         shell: bash
         run: |
           if [ -f package-lock.json ]; then
-              npm ci
+            npm ci
           else
-              npm install
+            npm install
           fi
 
       # ---- Generate site-data BEFORE build ----
@@ -92,14 +95,14 @@ jobs:
             echo "No generator script found - skipping."
           fi
 
-- name: Restore Next.js build cache
-  uses: actions/cache@v4
-  with:
-    path: .next/cache
-    key: ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-${{ hashFiles('next.config.js') }}
-    restore-keys: |
-      ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-
-      ${{ runner.os }}-next-
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-${{ hashFiles('next.config.js') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-next-
 
       # Next.js static export should create ./out (next.config.js: output:'export')
       - name: Build (Next.js static export)
