@@ -1,4 +1,4 @@
-'s // pages/media.jsx
+// pages/media.jsx
 import Head from "next/head";
 import fs from "fs/promises";
 import path from "path";
