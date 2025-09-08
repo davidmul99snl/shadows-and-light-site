@@ -20,7 +20,7 @@ export default function About() {
         </p>
 
         <div className={styles.photo}>
-          <img src="/live.jpg" alt="Shadows & Light performing live" />
+          <img src="/hero-giglive.jpg" alt="Shadows & Light performing live" />
         </div>
 
         <p>
