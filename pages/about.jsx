@@ -1,4 +1,4 @@
-import Link from 'next/link'
+ import Link from 'next/link'
 import styles from '../styles/About.module.css'
 
 const HERO = '/hero-about.jpg'
@@ -14,10 +14,9 @@ export default function About() {
         <h1 className={styles.pageTitle}>About Us</h1>
 
         <p>
-          Maura, Dave and Paul have a long musical pedigree — Dave and Paul have been playing together
-          for 25 years, while Maura has been singing with the guys as part of Shadows &amp; Light in Dublin.
-          Dave has a Degree in Jazz Performance from Newpark Music School, Paul is a full-time composer,
-          and Maura has a Masters in Music and is a full-time music teacher.
+          Maura, Dave M, Paul and Dave Mc have a long musical pedigree — Dave M and Paul have played music together
+          for many years in the Netherlands and Ireland, and joined forces with Maura around 2005. While recording Joni tunes, they met with Dave Mc who joined as percussionist around 2016.
+          Dave M has a Degree in Jazz Performance from Newpark Music School, Paul is a full-time composer and musician, and Maura has a Masters in Music and is a full-time music teacher. Dave Mc is owner, producer and engineer at Ventry Recording studios
         </p>
 
         <div className={styles.photo}>
