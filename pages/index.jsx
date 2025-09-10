@@ -17,12 +17,12 @@ export default function Home() {
       {/* Text BELOW the image, centered */}
       <section className={styles.heroContent}>
         <h1 className={styles.heroTitle}>
-          Eclectic songs, luminous arrangements —{' '}
+          Joni's music from across the decades.{' '}
           <span className={styles.gradientText}>the play of shadows &amp; light.</span>
         </h1>
 
         <p className={styles.heroTagline}>
-          Joni's music from across the decades.
+          Eclectic songs and styles, luminous arrangements
         </p>
 
         <div className={styles.ctaRow}>
