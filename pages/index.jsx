@@ -18,7 +18,7 @@ export default function Home() {
       <section className={styles.heroContent}>
         <h1 className={styles.heroTitle}>
           Joni's music from across the decades.{' '}
-          <span className={styles.gradientText}>the play of shadows &amp; light.</span>
+          <span className={styles.gradientText}>The play of shadows &amp; light.</span>
         </h1>
 
         <p className={styles.heroTagline}>
