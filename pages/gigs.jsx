@@ -20,9 +20,6 @@ export default function Gigs({ gigs }) {
         <meta name="description" content="Upcoming and past gigs for Shadows & Light" />
       </Head>
 
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
-
         {/* Hero banner */}
         <div className="mt-6">
           <img
@@ -31,7 +28,10 @@ export default function Gigs({ gigs }) {
             className="w-full h-auto rounded-xl shadow-sm"
           />
         </div>
-
+      
+        <main className="mx-auto max-w-4xl px-4 py-10">
+        <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
+          
         {sorted.length === 0 ? (
           <p className="mt-8 text-neutral-400">No gigs to show yet.</p>
         ) : (
