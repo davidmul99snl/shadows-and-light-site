@@ -120,6 +120,7 @@
 .heroTagline {
   margin: 0 0 16px;
   opacity: .9;
+  text-align: center;
 }
 
 .ctaRow {
