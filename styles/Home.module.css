@@ -74,6 +74,7 @@
 .heroTitle {
   margin: 0 auto 12px;
   max-width: 900px;
+  text-align: center;
 }
 
 /* Optional: tagline width */
@@ -81,6 +82,7 @@
   margin: 0 auto 16px;
   max-width: 720px;
   opacity: .9;
+  text-align: center;
 }
 
 /* Center the buttons */
