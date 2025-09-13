@@ -16,7 +16,7 @@ export default function Contact() {
         <p>We’d love to hear from you — bookings, festivals, theatres, and private events.</p>
 
         <p>
-          Email us: <a className={styles.link} href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a>
+          Email us: <a className={styles.link} href="mailto:shadowsandlightmusic@gmail.com">YOUR_EMAIL_HERE</a>
         </p>
 
         <div className={styles.socials}>
