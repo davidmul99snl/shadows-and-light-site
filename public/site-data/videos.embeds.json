@@ -27,4 +27,13 @@
     "videoId": "1LG_AiboElI",
     "order": 4
   }
+  {
+    "title": "Band Favourites!",
+    "src": "/video/SL Favourites.mp4",
+    "poster": "/thumbnails/joni-blue.jpg",
+    "thumbnailAlt": "Joni Mitchell Blue album cover",
+    "width": 1920,
+    "height": 1080
+  },
+
 ]
