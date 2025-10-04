@@ -16,7 +16,7 @@ export default function About() {
         <p>
           Maura, Dave M, Paul and Dave Mc have a long musical pedigree — Dave M and Paul have played music together
           for many years in the Netherlands and Ireland, and joined forces with Maura around 2005. While recording Joni tunes, they met with Dave Mc who joined as percussionist around 2016.
-          Dave M has a Degree in Jazz Performance from Newpark Music School, Paul is a full-time composer and musician, and Maura has a Masters in Music and is a full-time music teacher. Dave Mc is owner, producer and engineer at Ventry Recording studios
+          Dave M has a Degree in Jazz Performance from Newpark Music School, Paul is a full-time composer and musician, and Maura has a Masters in Music and is a full-time music teacher. Dave McCune is owner, producer and engineer at Ventry Recording Studios
         </p>
 
         <div className={styles.photo}>
