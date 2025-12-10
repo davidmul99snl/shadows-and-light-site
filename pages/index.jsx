@@ -22,7 +22,7 @@ export default function Home() {
         </h1>
 
         <p className={styles.heroTagline}>
-          Eclectic songs and styles, luminous arrangements
+          Eclectic songs and styles, luminous arrangements 
         </p>
 
         <div className={styles.ctaRow}>
