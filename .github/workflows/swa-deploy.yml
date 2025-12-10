@@ -26,7 +26,6 @@ jobs:
         run: |
           npm ci
           npm run build
-          npm run export
 
       - name: Deploy to Azure Static Web App
         uses: Azure/static-web-apps-deploy@v1
@@ -34,8 +33,8 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "out"      # we've already exported here
-          skip_app_build: true     # don't re-build inside the action
+          app_location: "out"      # Next.js with output: 'export' writes here on build
+          skip_app_build: true     # we've already built, so don't rebuild
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
