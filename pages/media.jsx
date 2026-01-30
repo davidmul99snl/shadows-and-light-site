@@ -120,7 +120,7 @@ export default function Media({ videos = [], audios = [] }) {
         {(!videos || videos.length === 0) && (!audios || audios.length === 0) && (
           <p className="mt-10 text-neutral-600">
             No media found yet. Make sure your workflow generated{" "}
-            <code>/public/site-data/videos.json</code> and{" "}
+            <code>/public/site-data/videos.embeds.json</code> and{" "}
             <code>/public/site-data/audio.json</code>.
           </p>
         )}
@@ -130,7 +130,7 @@ export default function Media({ videos = [], audios = [] }) {
 }
 
 export async function getStaticProps() {
-  const videos = await readJsonFromPublic("videos.json");
+  const videos = await readJsonFromPublic("videos.embeds.json");
   const audios = await readJsonFromPublic("audio.json");
   return { props: { videos, audios } };
 }
