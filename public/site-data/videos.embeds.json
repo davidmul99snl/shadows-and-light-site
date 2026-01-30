@@ -1,39 +1,30 @@
 [
   {
-    "kind": "embed",
-    "provider": "youtube",
+    "id": "yt-1",
     "title": "In France They Kiss on Main Street",
-    "videoId": "KzA8yRLyJOc",
-    "order": 1
+    "embedUrl": "https://www.youtube.com/embed/KzA8yRLyJOc"
   },
   {
-    "kind": "embed",
-    "provider": "youtube",
+    "id": "yt-2",
     "title": "A Case of You (Belfast Cathedral Culture Night)",
-    "videoId": "v5fRi9kyWJw",
-    "order": 2
+    "embedUrl": "https://www.youtube.com/embed/v5fRi9kyWJw"
   },
   {
-    "kind": "embed",
-    "provider": "youtube",
+    "id": "yt-3",
     "title": "Both Sides Now",
-    "videoId": "9CfOa1C6Svk",
-    "order": 3
+    "embedUrl": "https://www.youtube.com/embed/9CfOa1C6Svk"
   },
   {
-    "kind": "embed",
-    "provider": "youtube",
+    "id": "yt-4",
     "title": "Hejira",
-    "videoId": "1LG_AiboElI",
-    "order": 4
-  }
+    "embedUrl": "https://www.youtube.com/embed/1LG_AiboElI"
+  },
   {
+    "id": "local-1",
     "title": "Band Favourites!",
     "src": "/video/SL Favourites.mp4",
     "poster": "/thumbnails/joni-blue.jpg",
-    "thumbnailAlt": "Joni Mitchell Blue album cover",
     "width": 1920,
     "height": 1080
-  },
-
+  }
 ]
