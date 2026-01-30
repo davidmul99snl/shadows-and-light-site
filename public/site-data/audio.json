@@ -1,12 +1,68 @@
 [
   {
     "id": 1,
-    "title": "River \u2013 rehearsal take",
-    "url": "#"
+    "title": "Both Sides Now",
+    "src": "/audio/Both Sides Now.mp3",
+    "type": "audio/mpeg"
   },
   {
     "id": 2,
-    "title": "California \u2013 live",
-    "url": "#"
+    "title": "Free Man in Paris",
+    "src": "/audio/Free Man in Paris.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 3,
+    "title": "Help Me",
+    "src": "/audio/Help Me.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 4,
+    "title": "In France They Kiss On Main Street",
+    "src": "/audio/In France They Kiss On Main Street.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 5,
+    "title": "My Secret Place",
+    "src": "/audio/My Secret Place.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 6,
+    "title": "Woodstock",
+    "src": "/audio/SL11 Woodstock.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 7,
+    "title": "Hejira",
+    "src": "/audio/SL14 Hejira.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 8,
+    "title": "All I Want",
+    "src": "/audio/SL15 All I Want.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 9,
+    "title": "Shades of Scarlett",
+    "src": "/audio/Shades of Scarlett.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 10,
+    "title": "Trouble Child",
+    "src": "/audio/Trouble Child.mp3",
+    "type": "audio/mpeg"
+  },
+  {
+    "id": 11,
+    "title": "Twisted",
+    "src": "/audio/Twisted.mp3",
+    "type": "audio/mpeg"
   }
 ]
