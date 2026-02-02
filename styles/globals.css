@@ -60,3 +60,72 @@ ul.media-grid > li > .media-tile > .media-frame{
 ul.media-grid > li > .media-tile > video.media-frame{
   object-fit: contain;
 }
+
+/* --- Typography polish (site-wide) --- */
+:root{
+  /* A simple, consistent scale */
+  --text-xs: 0.875rem;   /* 14px */
+  --text-sm: 0.9375rem;  /* 15px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+}
+
+html{
+  /* Slightly better readability on modern screens */
+  font-size: 16px;
+}
+
+body{
+  font-size: var(--text-base);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Keep headings consistent everywhere */
+h1, h2, h3{
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.6em;
+}
+
+h2{ font-size: clamp(20px, 2.2vw, 28px); }
+h3{ font-size: clamp(18px, 1.7vw, 22px); }
+
+/* Body text defaults */
+p, li{
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* Links: less jumpy */
+a{
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+a:hover{
+  text-decoration: underline;
+}
+
+/* Navigation brand: reduce “shouty” look */
+.brand{
+  letter-spacing: 0.2px; /* was .5px */
+  font-weight: 650;      /* slightly softer than 700 */
+}
+
+/* Buttons: consistent size + less chunky */
+.button,
+.buttonOutline{
+  font-size: var(--text-sm);
+  line-height: 1.1;
+  font-weight: 600;
+  padding: 10px 14px;     /* slightly less wide */
+  border-radius: 12px;
+}
+
+.hero p{
+  font-size: var(--text-lg);
+  line-height: 1.7;
+}
