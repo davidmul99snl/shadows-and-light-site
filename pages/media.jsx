@@ -16,6 +16,58 @@ async function readJsonFromPublic(filename) {
   }
 }
 
+/**
+ * Make YouTube embeds robust:
+ * - Accepts embed URLs, watch URLs, youtu.be URLs, shorts URLs
+ * - Converts to youtube-nocookie.com embed (more likely to work with privacy protections)
+ */
+function normalizeYouTubeEmbedUrl(input) {
+  if (!input || typeof input !== "string") return null;
+
+  let url;
+  try {
+    url = new URL(input);
+  } catch {
+    // If it's not a URL, just return null (we'll fall back to local <video>)
+    return null;
+  }
+
+  const host = url.hostname.replace(/^www\./, "");
+  let id = null;
+
+  // Standard embed: youtube.com/embed/VIDEOID
+  if ((host === "youtube.com" || host === "m.youtube.com") && url.pathname.startsWith("/embed/")) {
+    id = url.pathname.split("/embed/")[1]?.split(/[?&#/]/)[0] ?? null;
+  }
+
+  // Watch: youtube.com/watch?v=VIDEOID
+  if (!id && (host === "youtube.com" || host === "m.youtube.com") && url.pathname === "/watch") {
+    id = url.searchParams.get("v");
+  }
+
+  // Short links: youtu.be/VIDEOID
+  if (!id && host === "youtu.be") {
+    id = url.pathname.replace("/", "").split(/[?&#/]/)[0] ?? null;
+  }
+
+  // Shorts: youtube.com/shorts/VIDEOID
+  if (!id && (host === "youtube.com" || host === "m.youtube.com") && url.pathname.startsWith("/shorts/")) {
+    id = url.pathname.split("/shorts/")[1]?.split(/[?&#/]/)[0] ?? null;
+  }
+
+  // If we can’t extract an ID, it’s not a YouTube URL we understand
+  if (!id) return null;
+
+  // Use privacy-enhanced domain
+  const embed = new URL(`https://www.youtube-nocookie.com/embed/${id}`);
+
+  // Keep a couple of safe params (optional)
+  embed.searchParams.set("rel", "0");
+  embed.searchParams.set("modestbranding", "1");
+
+  return embed.toString();
+}
+
 export default function Media({ videos = [], audios = [] }) {
   return (
     <>
@@ -24,20 +76,21 @@ export default function Media({ videos = [], audios = [] }) {
         <meta name="description" content="Watch and Listen" />
       </Head>
 
-      
-  {/* Hero banner */}
-        <div className="mt-6">
-          <img
-            src={HERO}
-            alt="Shadows & Light live"
-            className="w-full h-auto rounded-xl shadow-sm"
-          />
-        </div>
-        <main className="mx-auto max-w-4xl px-4 py-10">
+      {/* Hero banner */}
+      <div className="mt-6">
+        <img
+          src={HERO}
+          alt="Shadows & Light live"
+          className="w-full h-auto rounded-xl shadow-sm"
+        />
+      </div>
+
+      <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
         <p className="mt-2 text-sm text-neutral-600">
-         A mixture of live and studio recordings
+          A mixture of live and studio recordings
         </p>
+
         {/* VIDEOS */}
         {Array.isArray(videos) && videos.length > 0 && (
           <section className="mt-8 space-y-6">
@@ -45,45 +98,59 @@ export default function Media({ videos = [], audios = [] }) {
 
             {/* Fixed-size thumbnail grid (styles in globals.css via .media-grid/.media-tile/.media-frame) */}
             <ul className="media-grid">
-              {videos.map((v, idx) => (
-                <li key={v.embedUrl || v.src || v.id || idx} className="flex flex-col">
-                  {/* Single, fixed 16:9 tile */}
-                  <div className="media-tile">
-                    {v.embedUrl ? (
-                      <iframe
-                        className="media-frame"
-                        src={v.embedUrl}
-                        title={v.title || "YouTube video"}
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        referrerPolicy="strict-origin-when-cross-origin"
-                      />
-                    ) : (
-                      <video
-                        controls
-                        playsInline
-                        preload="metadata"
-                        className="media-frame object-contain"
-                        poster={v.poster || v.thumbnail}
-                      >
-                        <source src={v.src} type={v.type || "video/mp4"} />
-                        Sorry, your browser can’t play this video.
-                      </video>
-                    )}
-                  </div>
+              {videos.map((v, idx) => {
+                const yt = normalizeYouTubeEmbedUrl(v.embedUrl);
+                const key = v.id || v.embedUrl || v.src || idx;
 
-                  <div className="mt-2">
-                    <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
-                    {v.description && (
-                      <p className="mt-1 text-sm text-neutral-600">{v.description}</p>
-                    )}
-                    {v.credit && (
-                      <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
+                return (
+                  <li key={key} className="flex flex-col">
+                    {/* Single, fixed 16:9 tile */}
+                    <div className="media-tile">
+                      {yt ? (
+                        <iframe
+                          className="media-frame"
+                          src={yt}
+                          title={v.title || "YouTube video"}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          referrerPolicy="strict-origin-when-cross-origin"
+                        />
+                      ) : v.embedUrl ? (
+                        // Non-YouTube embedUrl given but we couldn't parse it
+                        <iframe
+                          className="media-frame"
+                          src={v.embedUrl}
+                          title={v.title || "Embedded video"}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          referrerPolicy="strict-origin-when-cross-origin"
+                        />
+                      ) : (
+                        <video
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="media-frame object-contain"
+                          poster={v.poster || v.thumbnail}
+                        >
+                          <source src={v.src} type={v.type || "video/mp4"} />
+                          Sorry, your browser can’t play this video.
+                        </video>
+                      )}
+                    </div>
+
+                    <div className="mt-2">
+                      <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
+                      {v.description && (
+                        <p className="mt-1 text-sm text-neutral-600">{v.description}</p>
+                      )}
+                      {v.credit && <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         )}
@@ -98,17 +165,13 @@ export default function Media({ videos = [], audios = [] }) {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <h3 className="text-base font-medium">{a.title ?? "Untitled"}</h3>
-                      {a.duration && (
-                        <span className="text-xs text-neutral-500">{a.duration}</span>
-                      )}
+                      {a.duration && <span className="text-xs text-neutral-500">{a.duration}</span>}
                     </div>
                     <audio controls preload="metadata" className="w-full">
                       <source src={a.src} type={a.type ?? "audio/mpeg"} />
                       Your browser does not support the audio element.
                     </audio>
-                    {a.description && (
-                      <p className="text-sm text-neutral-600">{a.description}</p>
-                    )}
+                    {a.description && <p className="text-sm text-neutral-600">{a.description}</p>}
                   </div>
                 </li>
               ))}
