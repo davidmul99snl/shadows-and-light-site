@@ -1,0 +1,11 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "responseOverrides": {
+    "404": {
+      "redirect": "https://www.shadowsandlightmusic.com",
+      "statusCode": 301
+    }
+  }
+}
