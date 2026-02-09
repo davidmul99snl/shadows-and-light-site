@@ -21,14 +21,16 @@ export default function Gigs({ gigs }) {
       </Head>
 
         {/* Hero banner */}
-        <div className="mt-6">
-          <img
-            src={HERO}
-            alt="Shadows & Light live"
-            className="w-full h-auto rounded-xl shadow-sm"
-          />
-        </div>
-      
+	<div className="mt-6 px-4">
+	  <div className="mx-auto max-w-6xl">
+ 	   <img
+      src={HERO}
+      alt="Shadows & Light live"
+      className="w-full h-[240px] sm:h-[320px] md:h-[380px] object-cover object-center rounded-xl shadow-sm"
+  	 />
+  	</div>
+	 </div>
+
         <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
           
