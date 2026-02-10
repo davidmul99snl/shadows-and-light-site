@@ -58,10 +58,8 @@ export default function Gigs({ gigs }) {
     			: gig?.date || "";
 
 
-              const title =
-                gig?.title ||
-                [gig?.venue, gig?.city, gig?.country].filter(Boolean).join(", ") ||
-                "Untitled event";
+              const title = gig?.title || gig?.venue || "Untitled event";
+
 
               const where = [gig?.venue, gig?.city, gig?.country].filter(Boolean).join(", ");
 
