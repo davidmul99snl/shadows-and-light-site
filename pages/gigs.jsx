@@ -88,10 +88,16 @@ export default function Gigs({ gigs }) {
                         href={gig.tickets}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 underline decoration-blue-500 underline-offset-4 font-medium"
-                      >
-                        Tickets
-                      </a>
+                        style={{
+                          color: "#2563eb",
+                         textDecoration: "underline",
+                         textDecorationColor: "#2563eb",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Tickets
+                        </a>
+
                     ) : gig?.tickets === "TBC" ? (
                       <span className="text-neutral-400">Tickets TBC</span>
                     ) : null}
