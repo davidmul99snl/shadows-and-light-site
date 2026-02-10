@@ -61,7 +61,7 @@ export default function Gigs({ gigs }) {
               const title = gig?.title || gig?.venue || "Untitled event";
 
 
-              const where = [gig?.venue, gig?.city, gig?.country].filter(Boolean).join(", ");
+				const where = [gig?.city, gig?.country].filter(Boolean).join(", ");
 
               return (
                 <li key={key} className="rounded-xl border border-neutral-800 p-4">
@@ -76,8 +76,7 @@ export default function Gigs({ gigs }) {
                           href={gig.tickets}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-semibold text-sky-300 underline underline-offset-4 decoration-sky-300 hover:text-sky-200"
-
+							className="font-semibold underline underline-offset-4 decoration-current"
 
                         >
                           Tickets
