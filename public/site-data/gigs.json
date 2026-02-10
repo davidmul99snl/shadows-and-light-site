@@ -1,53 +1,37 @@
 [
   {
-  "date": "2026-03-28",
-  "venue": "Druid, The Mick Lally Theatre",
-  "city": "Galway",
-  "note": "Doors 7:30pm, Start 8.00pm",
-  "ticketUrl": "https://www.druid.ie/about/the-mick-lally-theatre/whats-on/songs-and-stories-of-joni-mitchell-2",
-  "ticketText": "Tickets"
-  }
-
+    "date": "2026-03-28",
+    "venue": "Druid, The Mick Lally Theatre",
+    "city": "Galway",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": "https://www.druid.ie/about/the-mick-lally-theatre/whats-on/songs-and-stories-of-joni-mitchell-2"
+  },
   {
-  "date": "2026-04-11",
-  "venue": "Crescent Arts Theatre",
-  "city": "Belfast",
-  "note": "Doors 7:30pm, Start 8.00pm",
-  "ticketUrl": "https://crescentarts.org/events/shadows-and-light-songs--stories-of-joni-mitchell",
-  "ticketText": "Tickets"
-  }
-
-
+    "date": "2026-04-11",
+    "venue": "Crescent Arts Theatre",
+    "city": "Belfast",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": "https://crescentarts.org/events/shadows-and-light-songs--stories-of-joni-mitchell"
+  },
   {
-  "date": "2026-05-1",
-  "venue": "Connollys of Leap",
-  "city": "Cork",
-  "note": "Doors 7:30pm, Start 8.00pm",
-  "ticketUrl": "TBC",
-  "ticketText": "Tickets"
-  }
-
-
+    "date": "2026-05-01",
+    "venue": "Connollys of Leap",
+    "city": "Cork",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": null
+  },
   {
-  "date": "2026-09-05",
-  "venue": "Seamus Ennis Theatre",
-  "city": "Dublin",
-  "note": "Doors 7:30pm, Start 8.00pm",
-  "ticketUrl": "TBC",
-  "ticketText": "Tickets"
-  }
-
-
+    "date": "2026-09-05",
+    "venue": "Seamus Ennis Theatre",
+    "city": "Dublin",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": null
+  },
   {
-  "date": "2026-09-12",
-  "venue": "Whale Theatre Greystones",
-  "city": "Wicklow",
-  "note": "Doors 7:30pm, Start 8.00pm",
-  "ticketUrl": "TBC",
-  "ticketText": "Tickets"
+    "date": "2026-09-12",
+    "venue": "Whale Theatre Greystones",
+    "city": "Wicklow",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": null
   }
-
-
-
-  
 ]
