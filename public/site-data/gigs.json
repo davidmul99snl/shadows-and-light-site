@@ -1,14 +1,53 @@
 [
   {
-    "id": 1,
-    "date": "2025-09-14",
-    "time": "16:00",
-    "venue": "Dempsey's Balbriggan",
-    "city": "Dublin",
-    "country": "Ireland",
-    "tickets": "#",
-    "eventUrl": "#",
-    "price": "No Cover Charge",
-    "status": "upcoming"
+  "date": "2026-03-28",
+  "venue": "Druid, The Mick Lally Theatre",
+  "city": "Galway",
+  "note": "Doors 7:30pm, Start 8.00pm",
+  "ticketUrl": "https://www.druid.ie/about/the-mick-lally-theatre/whats-on/songs-and-stories-of-joni-mitchell-2",
+  "ticketText": "Tickets"
   }
+
+  {
+  "date": "2026-04-11",
+  "venue": "Crescent Arts Theatre",
+  "city": "Belfast",
+  "note": "Doors 7:30pm, Start 8.00pm",
+  "ticketUrl": "https://crescentarts.org/events/shadows-and-light-songs--stories-of-joni-mitchell",
+  "ticketText": "Tickets"
+  }
+
+
+  {
+  "date": "2026-05-1",
+  "venue": "Connollys of Leap",
+  "city": "Cork",
+  "note": "Doors 7:30pm, Start 8.00pm",
+  "ticketUrl": "TBC",
+  "ticketText": "Tickets"
+  }
+
+
+  {
+  "date": "2026-09-05",
+  "venue": "Seamus Ennis Theatre",
+  "city": "Dublin",
+  "note": "Doors 7:30pm, Start 8.00pm",
+  "ticketUrl": "TBC",
+  "ticketText": "Tickets"
+  }
+
+
+  {
+  "date": "2026-09-12",
+  "venue": "Whale Theatre Greystones",
+  "city": "Wicklow",
+  "note": "Doors 7:30pm, Start 8.00pm",
+  "ticketUrl": "TBC",
+  "ticketText": "Tickets"
+  }
+
+
+
+  
 ]
