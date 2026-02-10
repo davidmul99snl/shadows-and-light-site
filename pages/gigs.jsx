@@ -1,7 +1,19 @@
 // pages/gigs.jsx
+
+
 import Head from "next/head";
 import path from "path";
 import fs from "fs/promises";
+
+function formatIrishDate(isoDate) 
+	{
+  		const d = new Date(isoDate);
+  		return d.toLocaleDateString("en-IE", {
+    		day: "numeric",
+    		month: "long",
+    		year: "numeric"
+  	});
+	}
 
 const HERO = "/hero-giglive.jpg";
 
@@ -41,9 +53,10 @@ export default function Gigs({ gigs }) {
             {sorted.map((gig, i) => {
               const key = `${gig?.id || gig?.slug || gig?.date || "gig"}-${i}`;
               const when =
-                gig?.date && !isNaN(new Date(gig.date))
-                  ? formatDate(gig.date)
-                  : gig?.date || "";
+  				gig?.date && !isNaN(new Date(gig.date))
+  				  ? formatIrishDate(gig.date)
+    			: gig?.date || "";
+
 
               const title =
                 gig?.title ||
@@ -117,13 +130,4 @@ export async function getStaticProps() {
   return { props: { gigs } };
 }
 
-function formatDate(isoOrText) {
-  const d = new Date(isoOrText);
-  if (isNaN(d)) return isoOrText;
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    weekday: "short",
-  }).format(d);
-}
+
