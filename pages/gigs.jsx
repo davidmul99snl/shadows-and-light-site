@@ -78,7 +78,8 @@ export default function Gigs({ gigs }) {
                           href={gig.tickets}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="underline"
+                          className="text-sky-400 underline underline-offset-4 hover:text-sky-300"
+
                         >
                           Tickets
                         </a>
