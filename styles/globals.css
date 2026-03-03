@@ -269,3 +269,134 @@ ul.media-grid > li > .media-tile > video.media-frame{
   color: var(--fg);              /* cleaner contrast */
   margin: 0 0 4px;
 }
+
+/* --- Audio title refinement (less chunky) --- */
+.audioTitle{
+  font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: var(--fg);
+  margin: 0;
+}
+
+/* --- Videos list (no thumbnails) --- */
+.videoList{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.videoListItem{
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.videoLink{
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+
+  font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: var(--fg);
+}
+
+.videoLink:hover{
+  text-decoration: underline;
+}
+
+.videoMeta{
+  margin: 6px 0 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.videoMetaSmall{
+  margin: 6px 0 0;
+  font-size: var(--text-xs);
+  color: color-mix(in oklab, var(--muted) 85%, transparent);
+}
+
+/* --- Modal --- */
+.modalBackdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  z-index: 50;
+}
+
+.modal{
+  width: min(960px, 100%);
+  max-height: calc(100vh - 24px);   /* mobile-safe */
+  display: flex;                    /* allows body scroll area */
+  flex-direction: column;
+  background: color-mix(in oklab, var(--bg) 80%, #000);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+}
+
+.modalHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.modalTitle{
+  font-size: var(--text-base);
+  font-weight: 550;
+  letter-spacing: 0.2px;
+  color: var(--fg);
+}
+
+.modalClose{
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.04);
+  color: var(--fg);
+  border-radius: 14px;
+  padding: 10px 12px;               /* touch-friendly */
+  cursor: pointer;
+}
+
+.modalClose:hover{
+  background: rgba(255,255,255,0.07);
+}
+
+.modalBody{
+  overflow: auto;                   /* scroll inside modal if needed */
+}
+
+.modalFrame{
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  display: block;
+}
+
+.modalVideo{
+  width: 100%;
+  display: block;
+}
+
+/* --- Optional: make Tailwind neutral text/borders less "light-theme" on dark bg --- */
+/* This gently fixes places where text-neutral-600 etc is used inside your pages. */
+.text-neutral-600{ color: var(--muted) !important; }
+.text-neutral-500{ color: color-mix(in oklab, var(--muted) 85%, transparent) !important; }
+.border-neutral-200{ border-color: rgba(255,255,255,0.10) !important; }
