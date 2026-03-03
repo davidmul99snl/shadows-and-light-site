@@ -1,4 +1,5 @@
 // pages/media.jsx
+import React from "react";
 import Head from "next/head";
 import fs from "fs/promises";
 import path from "path";
@@ -67,7 +68,157 @@ function normalizeYouTubeEmbedUrl(input) {
 
   return embed.toString();
 }
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
+function AudioPlayer({ src, type = "audio/mpeg" }) {
+  const audioRef = React.useRef(null);
+  const rafRef = React.useRef(null);
+
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [duration, setDuration] = React.useState(0);
+  const [current, setCurrent] = React.useState(0);
+  const [isSeeking, setIsSeeking] = React.useState(false);
+
+  const tick = React.useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (!isSeeking) setCurrent(el.currentTime || 0);
+    rafRef.current = requestAnimationFrame(tick);
+  }, [isSeeking]);
+
+  React.useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+
+    const onLoaded = () => setDuration(el.duration || 0);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onEnded = () => setIsPlaying(false);
+
+    el.addEventListener("loadedmetadata", onLoaded);
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
+    el.addEventListener("ended", onEnded);
+
+    return () => {
+      el.removeEventListener("loadedmetadata", onLoaded);
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
+      el.removeEventListener("ended", onEnded);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    // keep UI synced while playing
+    if (isPlaying) {
+      rafRef.current = requestAnimationFrame(tick);
+      return () => rafRef.current && cancelAnimationFrame(rafRef.current);
+    }
+  }, [isPlaying, tick]);
+
+  const toggle = async () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      try {
+        await el.play();
+      } catch {
+        // autoplay restrictions etc.
+      }
+    } else {
+      el.pause();
+    }
+  };
+
+  const skip = (delta) => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.currentTime = Math.min(Math.max(0, (el.currentTime || 0) + delta), duration || el.duration || 0);
+    setCurrent(el.currentTime || 0);
+  };
+
+  const onSeekChange = (e) => {
+    const el = audioRef.current;
+    if (!el) return;
+    const val = Number(e.target.value);
+    el.currentTime = val;
+    setCurrent(val);
+  };
+
+  const progressPct = duration > 0 ? (current / duration) * 100 : 0;
+
+  return (
+    <div className="player">
+      {/* Hidden native audio element (no controls) */}
+      <audio ref={audioRef} preload="metadata">
+        <source src={src} type={type} />
+      </audio>
+
+      <div className="playerRow">
+        <button
+          type="button"
+          className="playerBtn playerBtnPrimary"
+          onClick={toggle}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? "❚❚" : "▶"}
+        </button>
+
+        <button
+          type="button"
+          className="playerBtn"
+          onClick={() => skip(-10)}
+          aria-label="Back 10 seconds"
+          title="Back 10s"
+        >
+          ↺10
+        </button>
+
+        <button
+          type="button"
+          className="playerBtn"
+          onClick={() => skip(10)}
+          aria-label="Forward 10 seconds"
+          title="Forward 10s"
+        >
+          10↻
+        </button>
+
+        <div className="playerTime" aria-label="Time">
+          <span>{formatTime(current)}</span>
+          <span className="playerTimeSep">/</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      <div className="playerScrub">
+        <div className="playerTrack" aria-hidden="true">
+          <div className="playerFill" style={{ width: `${progressPct}%` }} />
+        </div>
+
+        <input
+          className="playerRange"
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={0.1}
+          value={Math.min(current, duration || 0)}
+          onMouseDown={() => setIsSeeking(true)}
+          onMouseUp={() => setIsSeeking(false)}
+          onTouchStart={() => setIsSeeking(true)}
+          onTouchEnd={() => setIsSeeking(false)}
+          onChange={onSeekChange}
+          aria-label="Seek"
+        />
+      </div>
+    </div>
+  );
+}
 export default function Media({ videos = [], audios = [] }) {
   return (
     <>
@@ -167,10 +318,12 @@ export default function Media({ videos = [], audios = [] }) {
                       <h3 className="text-base font-medium">{a.title ?? "Untitled"}</h3>
                       {a.duration && <span className="text-xs text-neutral-500">{a.duration}</span>}
                     </div>
-                    <audio controls preload="metadata" className="w-full">
-                      <source src={a.src} type={a.type ?? "audio/mpeg"} />
-                      Your browser does not support the audio element.
-                    </audio>
+                    
+                    <AudioPlayer 
+                      src={a.src} 
+                      type={a.type ?? "audio/mpeg"} 
+                    />
+                    
                     {a.description && <p className="text-sm text-neutral-600">{a.description}</p>}
                   </div>
                 </li>
