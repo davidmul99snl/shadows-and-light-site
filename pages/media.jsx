@@ -275,10 +275,13 @@ export default function Media({ videos = [], audios = [] }) {
                   <li key={key} className="videoListItem">
                     <button
                       type="button"
-                      className="videoLink"
+                      className="videoRow"
                       onClick={() => setOpenVideo(v)}
                     >
-                      {v.title ?? "Untitled"}
+                      <span className="videoPlayIcon" aria-hidden="true">▶</span>
+                      <span className="videoTitle">
+                        {v.title ?? "Untitled"}
+                      </span>
                     </button>
 
                     {v.description && <p className="videoMeta">{v.description}</p>}
