@@ -32,7 +32,6 @@ function normalizeYouTubeEmbedUrl(input) {
   try {
     url = new URL(input);
   } catch {
-    // If it's not a URL, just return null (we'll fall back to local <video>)
     return null;
   }
 
@@ -40,19 +39,12 @@ function normalizeYouTubeEmbedUrl(input) {
   let id = null;
 
   // Standard embed: youtube.com/embed/VIDEOID
-  if (
-    (host === "youtube.com" || host === "m.youtube.com") &&
-    url.pathname.startsWith("/embed/")
-  ) {
+  if ((host === "youtube.com" || host === "m.youtube.com") && url.pathname.startsWith("/embed/")) {
     id = url.pathname.split("/embed/")[1]?.split(/[?&#/]/)[0] ?? null;
   }
 
   // Watch: youtube.com/watch?v=VIDEOID
-  if (
-    !id &&
-    (host === "youtube.com" || host === "m.youtube.com") &&
-    url.pathname === "/watch"
-  ) {
+  if (!id && (host === "youtube.com" || host === "m.youtube.com") && url.pathname === "/watch") {
     id = url.searchParams.get("v");
   }
 
@@ -62,21 +54,14 @@ function normalizeYouTubeEmbedUrl(input) {
   }
 
   // Shorts: youtube.com/shorts/VIDEOID
-  if (
-    !id &&
-    (host === "youtube.com" || host === "m.youtube.com") &&
-    url.pathname.startsWith("/shorts/")
-  ) {
+  if (!id && (host === "youtube.com" || host === "m.youtube.com") && url.pathname.startsWith("/shorts/")) {
     id = url.pathname.split("/shorts/")[1]?.split(/[?&#/]/)[0] ?? null;
   }
 
-  // If we can’t extract an ID, it’s not a YouTube URL we understand
   if (!id) return null;
 
   // Use privacy-enhanced domain
   const embed = new URL(`https://www.youtube-nocookie.com/embed/${id}`);
-
-  // Keep a couple of safe params (optional)
   embed.searchParams.set("rel", "0");
   embed.searchParams.set("modestbranding", "1");
 
@@ -121,13 +106,10 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
     const onLoaded = () => setDuration(el.duration || 0);
 
     const onPlay = () => {
-      // Pause any other audio that might be playing
       if (ACTIVE_AUDIO_EL && ACTIVE_AUDIO_EL !== el) {
         try {
           ACTIVE_AUDIO_EL.pause();
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
       ACTIVE_AUDIO_EL = el;
       setIsPlaying(true);
@@ -170,9 +152,7 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
     if (el.paused) {
       try {
         await el.play();
-      } catch {
-        // autoplay restrictions etc.
-      }
+      } catch {}
     } else {
       el.pause();
     }
@@ -190,7 +170,6 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
 
   return (
     <div className="player">
-      {/* Hidden native audio element (no controls) */}
       <audio ref={audioRef} preload="metadata">
         <source src={src} type={type} />
       </audio>
@@ -206,7 +185,6 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
           {isPlaying ? "❚❚" : "▶"}
         </button>
 
-        {/* Slider to the right of the play button */}
         <div className="playerScrubInline">
           <div className="playerTrack" aria-hidden="true">
             <div className="playerFill" style={{ width: `${progressPct}%` }} />
@@ -239,6 +217,28 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
 }
 
 export default function Media({ videos = [], audios = [] }) {
+  const [openVideo, setOpenVideo] = React.useState(null);
+
+  // ESC to close (desktop)
+  React.useEffect(() => {
+    if (!openVideo) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpenVideo(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openVideo]);
+
+  // Lock body scroll while modal open (important on mobile)
+  React.useEffect(() => {
+    if (!openVideo) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [openVideo]);
+
   return (
     <>
       <Head>
@@ -259,69 +259,26 @@ export default function Media({ videos = [], audios = [] }) {
         <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
         <p className="mt-2 text-sm text-neutral-600">Live and studio recordings</p>
 
-        {/* VIDEOS */}
+        {/* VIDEOS (title list + modal player) */}
         {Array.isArray(videos) && videos.length > 0 && (
           <section className="mt-8 space-y-6">
             <h2 className="text-xl font-medium">Videos</h2>
 
-            {/* Fixed-size thumbnail grid (styles in globals.css via .media-grid/.media-tile/.media-frame) */}
-            <ul className="media-grid">
+            <ul className="videoList">
               {videos.map((v, idx) => {
-                const yt = normalizeYouTubeEmbedUrl(v.embedUrl);
                 const key = v.id || v.embedUrl || v.src || idx;
-
                 return (
-                  <li key={key} className="flex flex-col">
-                    {/* Single, fixed 16:9 tile */}
-                    <div className="media-tile">
-                      {yt ? (
-                        <iframe
-                          className="media-frame"
-                          src={yt}
-                          title={v.title || "YouTube video"}
-                          loading="lazy"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          referrerPolicy="strict-origin-when-cross-origin"
-                        />
-                      ) : v.embedUrl ? (
-                        // Non-YouTube embedUrl given but we couldn't parse it
-                        <iframe
-                          className="media-frame"
-                          src={v.embedUrl}
-                          title={v.title || "Embedded video"}
-                          loading="lazy"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          referrerPolicy="strict-origin-when-cross-origin"
-                        />
-                      ) : (
-                        <video
-                          controls
-                          playsInline
-                          preload="metadata"
-                          className="media-frame object-contain"
-                          poster={v.poster || v.thumbnail}
-                        >
-                          <source src={v.src} type={v.type || "video/mp4"} />
-                          Sorry, your browser can’t play this video.
-                        </video>
-                      )}
-                    </div>
+                  <li key={key} className="videoListItem">
+                    <button
+                      type="button"
+                      className="videoLink"
+                      onClick={() => setOpenVideo(v)}
+                    >
+                      {v.title ?? "Untitled"}
+                    </button>
 
-                    <div className="mt-2">
-                      <h3 className="text-base font-medium">
-                        {v.title ?? "Untitled"}
-                      </h3>
-                      {v.description && (
-                        <p className="mt-1 text-sm text-neutral-600">
-                          {v.description}
-                        </p>
-                      )}
-                      {v.credit && (
-                        <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>
-                      )}
-                    </div>
+                    {v.description && <p className="videoMeta">{v.description}</p>}
+                    {v.credit && <p className="videoMetaSmall">{v.credit}</p>}
                   </li>
                 );
               })}
@@ -329,7 +286,7 @@ export default function Media({ videos = [], audios = [] }) {
           </section>
         )}
 
-        {/* AUDIO */}
+        {/* AUDIO (custom player) */}
         {Array.isArray(audios) && audios.length > 0 && (
           <section className="mt-12 space-y-6">
             <h2 className="text-xl font-medium">Audio</h2>
@@ -341,19 +298,13 @@ export default function Media({ videos = [], audios = [] }) {
                 >
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="audioTitle">
-                        {a.title ?? "Untitled"}
-                      </h3>
-                      {a.duration && (
-                        <span className="text-xs text-neutral-500">{a.duration}</span>
-                      )}
+                      <h3 className="audioTitle">{a.title ?? "Untitled"}</h3>
+                      {a.duration && <span className="text-xs text-neutral-500">{a.duration}</span>}
                     </div>
 
                     <AudioPlayer src={a.src} type={a.type ?? "audio/mpeg"} />
 
-                    {a.description && (
-                      <p className="text-sm text-neutral-600">{a.description}</p>
-                    )}
+                    {a.description && <p className="text-sm text-neutral-600">{a.description}</p>}
                   </div>
                 </li>
               ))}
@@ -368,6 +319,79 @@ export default function Media({ videos = [], audios = [] }) {
             <code>/public/site-data/videos.embeds.json</code> and{" "}
             <code>/public/site-data/audio.json</code>.
           </p>
+        )}
+
+        {/* Video Modal */}
+        {openVideo && (
+          <div
+            className="modalBackdrop"
+            onClick={() => setOpenVideo(null)}
+            role="presentation"
+          >
+            <div
+              className="modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label={openVideo.title ?? "Video"}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modalHeader">
+                <div className="modalTitle">{openVideo.title ?? "Video"}</div>
+                <button
+                  className="modalClose"
+                  onClick={() => setOpenVideo(null)}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="modalBody">
+                {(() => {
+                  const yt = normalizeYouTubeEmbedUrl(openVideo.embedUrl);
+
+                  if (yt) {
+                    return (
+                      <iframe
+                        className="modalFrame"
+                        src={yt}
+                        title={openVideo.title || "YouTube video"}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
+                      />
+                    );
+                  }
+
+                  if (openVideo.embedUrl) {
+                    return (
+                      <iframe
+                        className="modalFrame"
+                        src={openVideo.embedUrl}
+                        title={openVideo.title || "Embedded video"}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
+                      />
+                    );
+                  }
+
+                  return (
+                    <video
+                      className="modalVideo"
+                      controls
+                      playsInline
+                      preload="metadata"
+                      poster={openVideo.poster || openVideo.thumbnail}
+                    >
+                      <source src={openVideo.src} type={openVideo.type || "video/mp4"} />
+                      Sorry, your browser can’t play this video.
+                    </video>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </>
