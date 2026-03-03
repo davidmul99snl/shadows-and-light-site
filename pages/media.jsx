@@ -65,6 +65,10 @@ function normalizeYouTubeEmbedUrl(input) {
   embed.searchParams.set("rel", "0");
   embed.searchParams.set("modestbranding", "1");
 
+  // Autoplay behaviour
+  embed.searchParams.set("autoplay", "1");
+  embed.searchParams.set("mute", "1");
+  embed.searchParams.set("playsinline", "1");
   return embed.toString();
 }
 
@@ -383,6 +387,8 @@ export default function Media({ videos = [], audios = [] }) {
                       playsInline
                       preload="metadata"
                       poster={openVideo.poster || openVideo.thumbnail}
+                      autoPlay
+                      muted
                     >
                       <source src={openVideo.src} type={openVideo.type || "video/mp4"} />
                       Sorry, your browser can’t play this video.
