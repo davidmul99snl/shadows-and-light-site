@@ -260,3 +260,12 @@ ul.media-grid > li > .media-tile > video.media-frame{
 }
 
 .playerTimeSep{ opacity: 0.6; }
+
+/* --- Audio title refinement --- */
+.audioTitle{
+  font-size: var(--text-base);
+  font-weight: 500;              /* lighter than before */
+  letter-spacing: 0.2px;         /* subtle polish */
+  color: var(--fg);              /* cleaner contrast */
+  margin: 0 0 4px;
+}
