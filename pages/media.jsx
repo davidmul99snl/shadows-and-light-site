@@ -6,6 +6,9 @@ import path from "path";
 
 const HERO = "/hero-media.jpg";
 
+/** Ensure only one audio element plays at a time across the page */
+let ACTIVE_AUDIO_EL = null;
+
 // Read JSON from /public/site-data at build time
 async function readJsonFromPublic(filename) {
   try {
@@ -37,12 +40,19 @@ function normalizeYouTubeEmbedUrl(input) {
   let id = null;
 
   // Standard embed: youtube.com/embed/VIDEOID
-  if ((host === "youtube.com" || host === "m.youtube.com") && url.pathname.startsWith("/embed/")) {
+  if (
+    (host === "youtube.com" || host === "m.youtube.com") &&
+    url.pathname.startsWith("/embed/")
+  ) {
     id = url.pathname.split("/embed/")[1]?.split(/[?&#/]/)[0] ?? null;
   }
 
   // Watch: youtube.com/watch?v=VIDEOID
-  if (!id && (host === "youtube.com" || host === "m.youtube.com") && url.pathname === "/watch") {
+  if (
+    !id &&
+    (host === "youtube.com" || host === "m.youtube.com") &&
+    url.pathname === "/watch"
+  ) {
     id = url.searchParams.get("v");
   }
 
@@ -52,7 +62,11 @@ function normalizeYouTubeEmbedUrl(input) {
   }
 
   // Shorts: youtube.com/shorts/VIDEOID
-  if (!id && (host === "youtube.com" || host === "m.youtube.com") && url.pathname.startsWith("/shorts/")) {
+  if (
+    !id &&
+    (host === "youtube.com" || host === "m.youtube.com") &&
+    url.pathname.startsWith("/shorts/")
+  ) {
     id = url.pathname.split("/shorts/")[1]?.split(/[?&#/]/)[0] ?? null;
   }
 
@@ -68,6 +82,7 @@ function normalizeYouTubeEmbedUrl(input) {
 
   return embed.toString();
 }
+
 function formatTime(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
   const m = Math.floor(seconds / 60);
@@ -75,6 +90,13 @@ function formatTime(seconds) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/**
+ * Custom, brandable audio player UI:
+ * - Play/Pause
+ * - Slider to the right of Play button
+ * - Time display at far right
+ * - Ensures only one track plays at once
+ */
 function AudioPlayer({ src, type = "audio/mpeg" }) {
   const audioRef = React.useRef(null);
   const rafRef = React.useRef(null);
@@ -87,6 +109,7 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
   const tick = React.useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
+
     if (!isSeeking) setCurrent(el.currentTime || 0);
     rafRef.current = requestAnimationFrame(tick);
   }, [isSeeking]);
@@ -96,9 +119,29 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
     if (!el) return;
 
     const onLoaded = () => setDuration(el.duration || 0);
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
+
+    const onPlay = () => {
+      // Pause any other audio that might be playing
+      if (ACTIVE_AUDIO_EL && ACTIVE_AUDIO_EL !== el) {
+        try {
+          ACTIVE_AUDIO_EL.pause();
+        } catch {
+          // ignore
+        }
+      }
+      ACTIVE_AUDIO_EL = el;
+      setIsPlaying(true);
+    };
+
+    const onPause = () => {
+      setIsPlaying(false);
+      if (ACTIVE_AUDIO_EL === el) ACTIVE_AUDIO_EL = null;
+    };
+
+    const onEnded = () => {
+      setIsPlaying(false);
+      if (ACTIVE_AUDIO_EL === el) ACTIVE_AUDIO_EL = null;
+    };
 
     el.addEventListener("loadedmetadata", onLoaded);
     el.addEventListener("play", onPlay);
@@ -114,7 +157,6 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
   }, []);
 
   React.useEffect(() => {
-    // keep UI synced while playing
     if (isPlaying) {
       rafRef.current = requestAnimationFrame(tick);
       return () => rafRef.current && cancelAnimationFrame(rafRef.current);
@@ -124,6 +166,7 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
   const toggle = async () => {
     const el = audioRef.current;
     if (!el) return;
+
     if (el.paused) {
       try {
         await el.play();
@@ -133,13 +176,6 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
     } else {
       el.pause();
     }
-  };
-
-  const skip = (delta) => {
-    const el = audioRef.current;
-    if (!el) return;
-    el.currentTime = Math.min(Math.max(0, (el.currentTime || 0) + delta), duration || el.duration || 0);
-    setCurrent(el.currentTime || 0);
   };
 
   const onSeekChange = (e) => {
@@ -165,29 +201,32 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
           className="playerBtn playerBtnPrimary"
           onClick={toggle}
           aria-label={isPlaying ? "Pause" : "Play"}
+          title={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? "❚❚" : "▶"}
         </button>
 
-        <button
-          type="button"
-          className="playerBtn"
-          onClick={() => skip(-10)}
-          aria-label="Back 10 seconds"
-          title="Back 10s"
-        >
-          ↺10
-        </button>
+        {/* Slider to the right of the play button */}
+        <div className="playerScrubInline">
+          <div className="playerTrack" aria-hidden="true">
+            <div className="playerFill" style={{ width: `${progressPct}%` }} />
+          </div>
 
-        <button
-          type="button"
-          className="playerBtn"
-          onClick={() => skip(10)}
-          aria-label="Forward 10 seconds"
-          title="Forward 10s"
-        >
-          10↻
-        </button>
+          <input
+            className="playerRange"
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={0.1}
+            value={Math.min(current, duration || 0)}
+            onMouseDown={() => setIsSeeking(true)}
+            onMouseUp={() => setIsSeeking(false)}
+            onTouchStart={() => setIsSeeking(true)}
+            onTouchEnd={() => setIsSeeking(false)}
+            onChange={onSeekChange}
+            aria-label="Seek"
+          />
+        </div>
 
         <div className="playerTime" aria-label="Time">
           <span>{formatTime(current)}</span>
@@ -195,30 +234,10 @@ function AudioPlayer({ src, type = "audio/mpeg" }) {
           <span>{formatTime(duration)}</span>
         </div>
       </div>
-
-      <div className="playerScrub">
-        <div className="playerTrack" aria-hidden="true">
-          <div className="playerFill" style={{ width: `${progressPct}%` }} />
-        </div>
-
-        <input
-          className="playerRange"
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={0.1}
-          value={Math.min(current, duration || 0)}
-          onMouseDown={() => setIsSeeking(true)}
-          onMouseUp={() => setIsSeeking(false)}
-          onTouchStart={() => setIsSeeking(true)}
-          onTouchEnd={() => setIsSeeking(false)}
-          onChange={onSeekChange}
-          aria-label="Seek"
-        />
-      </div>
     </div>
   );
 }
+
 export default function Media({ videos = [], audios = [] }) {
   return (
     <>
@@ -238,9 +257,7 @@ export default function Media({ videos = [], audios = [] }) {
 
       <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Music &amp; Video</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          Live and studio recordings
-        </p>
+        <p className="mt-2 text-sm text-neutral-600">Live and studio recordings</p>
 
         {/* VIDEOS */}
         {Array.isArray(videos) && videos.length > 0 && (
@@ -293,11 +310,17 @@ export default function Media({ videos = [], audios = [] }) {
                     </div>
 
                     <div className="mt-2">
-                      <h3 className="text-base font-medium">{v.title ?? "Untitled"}</h3>
+                      <h3 className="text-base font-medium">
+                        {v.title ?? "Untitled"}
+                      </h3>
                       {v.description && (
-                        <p className="mt-1 text-sm text-neutral-600">{v.description}</p>
+                        <p className="mt-1 text-sm text-neutral-600">
+                          {v.description}
+                        </p>
                       )}
-                      {v.credit && <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>}
+                      {v.credit && (
+                        <p className="mt-1 text-xs text-neutral-500">{v.credit}</p>
+                      )}
                     </div>
                   </li>
                 );
@@ -312,19 +335,25 @@ export default function Media({ videos = [], audios = [] }) {
             <h2 className="text-xl font-medium">Audio</h2>
             <ul className="space-y-6">
               {audios.map((a, idx) => (
-                <li key={a.src || a.id || idx} className="rounded-xl border border-neutral-200 p-4">
+                <li
+                  key={a.src || a.id || idx}
+                  className="rounded-xl border border-neutral-200 p-4"
+                >
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-medium">{a.title ?? "Untitled"}</h3>
-                      {a.duration && <span className="text-xs text-neutral-500">{a.duration}</span>}
+                      <h3 className="text-base font-medium">
+                        {a.title ?? "Untitled"}
+                      </h3>
+                      {a.duration && (
+                        <span className="text-xs text-neutral-500">{a.duration}</span>
+                      )}
                     </div>
-                    
-                    <AudioPlayer 
-                      src={a.src} 
-                      type={a.type ?? "audio/mpeg"} 
-                    />
-                    
-                    {a.description && <p className="text-sm text-neutral-600">{a.description}</p>}
+
+                    <AudioPlayer src={a.src} type={a.type ?? "audio/mpeg"} />
+
+                    {a.description && (
+                      <p className="text-sm text-neutral-600">{a.description}</p>
+                    )}
                   </div>
                 </li>
               ))}
