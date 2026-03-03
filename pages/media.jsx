@@ -341,7 +341,7 @@ export default function Media({ videos = [], audios = [] }) {
                 >
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-medium">
+                      <h3 className="audioTitle">
                         {a.title ?? "Untitled"}
                       </h3>
                       {a.duration && (
