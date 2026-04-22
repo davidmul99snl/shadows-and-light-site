@@ -21,11 +21,25 @@
     "tickets": "https://connollysofleap.com/ticket/shadows-and-light-songs-and-stories-of-joni-mitchell-friday-1st-may"
   },
   {
+    "date": "2026-07-02",
+    "venue": "Glass Mask Theatre",
+    "city": "Dublin",
+    "notes": "Doors 6pm. Music 7pm onwards",
+    "tickets": "https://glassmasktheatre.ticketsolve.com/ticketbooth/shows/873684742"
+  },  
+  {
     "date": "2026-09-05",
     "venue": "Seamus Ennis Theatre",
     "city": "Dublin",
     "notes": "Doors 7:30pm, Start 8.00pm",
     "tickets": "https://www.tseac.ie/event-details/shadows-light"
+  },
+  {
+    "date": "2026-09-12",
+    "venue": "Whale Theatre Greystones",
+    "city": "Wicklow",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": "https://whaletheatre.ticketsolve.com/ticketbooth/shows/873661882"
   },
   {
     "date": "2026-09-12",
