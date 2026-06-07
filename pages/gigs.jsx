@@ -74,45 +74,46 @@ export default function Gigs({ gigs }) {
       <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
 
-				<div
-				  className="mt-8 border border-neutral-800 rounded-lg overflow-hidden"
-				  style={{
-				    display: "grid",
-				    gridTemplateColumns: "1fr 1fr",
-				    width: "100%",
-				  }}
-				>
-				  <button
-				    type="button"
-				    onClick={() => setActiveTab("upcoming")}
-				    className="px-4 py-3 text-sm font-medium text-center transition"
-				    style={{
-				      display: "block",
-				      width: "100%",
-				      backgroundColor: activeTab === "upcoming" ? "#ffffff" : "#111111",
-				      color: activeTab === "upcoming" ? "#000000" : "#737373",
-				    }}
-				  >
-				    Upcoming gigs
-				  </button>
-				
-				  <button
-				    type="button"
-				    onClick={() => setActiveTab("past")}
-				    className="px-4 py-3 text-sm font-medium text-center transition"
-				    style={{
-				      display: "block",
-				      width: "100%",
-				      borderLeft: "1px solid #262626",
-				      backgroundColor: activeTab === "past" ? "#404040" : "#000000",
-				      color: activeTab === "past" ? "#f5f5f5" : "#737373",
-				    }}
-				  >
-				    Past gigs
-				  </button>
-				</div>
-				
-       			{visibleGigs.length === 0 ? (
+        <div
+          className="mt-8 border border-neutral-800 rounded-lg overflow-hidden"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            width: "100%",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setActiveTab("upcoming")}
+            className="px-4 py-3 text-sm font-medium text-center transition"
+            style={{
+              display: "block",
+              width: "100%",
+              backgroundColor:
+                activeTab === "upcoming" ? "#ffffff" : "#111111",
+              color: activeTab === "upcoming" ? "#000000" : "#737373",
+            }}
+          >
+            Upcoming gigs
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("past")}
+            className="px-4 py-3 text-sm font-medium text-center transition"
+            style={{
+              display: "block",
+              width: "100%",
+              borderLeft: "1px solid #262626",
+              backgroundColor: activeTab === "past" ? "#404040" : "#000000",
+              color: activeTab === "past" ? "#f5f5f5" : "#737373",
+            }}
+          >
+            Past gigs
+          </button>
+        </div>
+
+        {visibleGigs.length === 0 ? (
           <p className="mt-8 text-neutral-400">
             {activeTab === "upcoming"
               ? "No upcoming gigs to show yet."
