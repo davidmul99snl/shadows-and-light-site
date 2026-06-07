@@ -75,23 +75,23 @@ export default function Gigs({ gigs }) {
         <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
 
 				<div
-				  className="mt-8 rounded-lg border border-neutral-800 overflow-hidden"
+				  className="mt-8 border border-neutral-800 rounded-lg overflow-hidden"
 				  style={{
-				    display: "flex",
+				    display: "grid",
+				    gridTemplateColumns: "1fr 1fr",
 				    width: "100%",
 				  }}
 				>
 				  <button
 				    type="button"
 				    onClick={() => setActiveTab("upcoming")}
+				    className="px-4 py-3 text-sm font-medium text-center transition"
 				    style={{
-				      flex: "1 1 0",
-				      width: "50%",
-						className={`px-4 py-3 text-sm font-medium text-center transition ${
-						  activeTab === "upcoming"
-						    ? "bg-white text-black"
-						    : "bg-neutral-900 text-neutral-500 hover:text-neutral-300"
-						}`}
+				      display: "block",
+				      width: "100%",
+				      backgroundColor: activeTab === "upcoming" ? "#ffffff" : "#111111",
+				      color: activeTab === "upcoming" ? "#000000" : "#737373",
+				    }}
 				  >
 				    Upcoming gigs
 				  </button>
@@ -99,15 +99,14 @@ export default function Gigs({ gigs }) {
 				  <button
 				    type="button"
 				    onClick={() => setActiveTab("past")}
+				    className="px-4 py-3 text-sm font-medium text-center transition"
 				    style={{
-				      flex: "1 1 0",
-				      width: "50%",
+				      display: "block",
+				      width: "100%",
+				      borderLeft: "1px solid #262626",
+				      backgroundColor: activeTab === "past" ? "#404040" : "#000000",
+				      color: activeTab === "past" ? "#f5f5f5" : "#737373",
 				    }}
-				    className={`px-4 py-3 text-sm font-medium text-center transition border-l border-neutral-800 ${
-				      activeTab === "past"
-				        ? "bg-neutral-700 text-neutral-100"
-				        : "bg-black text-neutral-500 hover:text-neutral-300"
-				    }`}
 				  >
 				    Past gigs
 				  </button>
