@@ -113,8 +113,6 @@ export default function Gigs({ gigs }) {
 				    Past gigs
 				  </button>
 				</div>
-
-This forces each tab to take exactly half the available width, regardless of the text length.
 				
 </div>        {visibleGigs.length === 0 ? (
           <p className="mt-8 text-neutral-400">
