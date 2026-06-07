@@ -114,7 +114,7 @@ export default function Gigs({ gigs }) {
 				  </button>
 				</div>
 				
-       {visibleGigs.length === 0 ? (
+       			{visibleGigs.length === 0 ? (
           <p className="mt-8 text-neutral-400">
             {activeTab === "upcoming"
               ? "No upcoming gigs to show yet."
