@@ -74,33 +74,32 @@ export default function Gigs({ gigs }) {
       <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
 
-					<div className="mt-8 grid grid-cols-2 rounded-lg border border-neutral-800 overflow-hidden">
-					  <button
-					    type="button"
-					    onClick={() => setActiveTab("upcoming")}
-					    className={`px-4 py-3 text-sm font-medium text-center transition ${
-					      activeTab === "upcoming"
-					        ? "bg-white text-black"
-					        : "bg-black text-neutral-400 hover:text-white"
-					    }`}
-					  >
-					    Upcoming gigs
-					  </button>
-					
-					  <button
-					    type="button"
-					    onClick={() => setActiveTab("past")}
-					    className={`px-4 py-3 text-sm font-medium text-center transition border-l border-neutral-800 ${
-					      activeTab === "past"
-					        ? "bg-neutral-700 text-neutral-100"
-					        : "bg-black text-neutral-500 hover:text-neutral-300"
-					    }`}
-					  >
-					    Past gigs
-					  </button>
-					</div>
-
-        {visibleGigs.length === 0 ? (
+			<div className="mt-8 flex w-full rounded-lg border border-neutral-800 overflow-hidden">
+			  <button
+			    type="button"
+			    onClick={() => setActiveTab("upcoming")}
+			    className={`w-1/2 px-4 py-3 text-sm font-medium text-center transition ${
+			      activeTab === "upcoming"
+			        ? "bg-white text-black"
+			        : "bg-black text-neutral-400 hover:text-white"
+			    }`}
+			  >
+			    Upcoming gigs
+			  </button>
+			
+			  <button
+			    type="button"
+			    onClick={() => setActiveTab("past")}
+			    className={`w-1/2 px-4 py-3 text-sm font-medium text-center transition border-l border-neutral-800 ${
+			      activeTab === "past"
+			        ? "bg-neutral-700 text-neutral-100"
+			        : "bg-black text-neutral-500 hover:text-neutral-300"
+			    }`}
+			  >
+			    Past gigs
+			  </button>
+				
+</div>        {visibleGigs.length === 0 ? (
           <p className="mt-8 text-neutral-400">
             {activeTab === "upcoming"
               ? "No upcoming gigs to show yet."
