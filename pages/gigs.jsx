@@ -87,12 +87,11 @@ export default function Gigs({ gigs }) {
 				    style={{
 				      flex: "1 1 0",
 				      width: "50%",
-				    }}
-				    className={`px-4 py-3 text-sm font-medium text-center transition ${
-				      activeTab === "upcoming"
-				        ? "bg-white text-black"
-				        : "bg-black text-neutral-400 hover:text-white"
-				    }`}
+						className={`px-4 py-3 text-sm font-medium text-center transition ${
+						  activeTab === "upcoming"
+						    ? "bg-white text-black"
+						    : "bg-neutral-900 text-neutral-500 hover:text-neutral-300"
+						}`}
 				  >
 				    Upcoming gigs
 				  </button>
