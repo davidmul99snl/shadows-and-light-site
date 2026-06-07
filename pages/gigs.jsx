@@ -1,4 +1,5 @@
 // pages/gigs.jsx
+import { useState } from "react";
 import Head from "next/head";
 import path from "path";
 import fs from "fs/promises";
@@ -15,13 +16,39 @@ function formatIrishDate(isoDate) {
   });
 }
 
+function getGigTime(gig) {
+  if (!gig?.date) return Number.MAX_SAFE_INTEGER;
+  const time = new Date(gig.date).getTime();
+  return isNaN(time) ? Number.MAX_SAFE_INTEGER : time;
+}
+
 export default function Gigs({ gigs }) {
+  const [activeTab, setActiveTab] = useState("upcoming");
+
   const list = Array.isArray(gigs) ? gigs : [];
-  const sorted = [...list].sort((a, b) => {
-    const da = a?.date ? new Date(a.date).getTime() : Number.MAX_SAFE_INTEGER;
-    const db = b?.date ? new Date(b.date).getTime() : Number.MAX_SAFE_INTEGER;
-    return da - db;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const sorted = [...list].sort((a, b) => getGigTime(a) - getGigTime(b));
+
+  const upcoming = sorted.filter((gig) => {
+    const d = new Date(gig?.date);
+    if (isNaN(d)) return true;
+    d.setHours(0, 0, 0, 0);
+    return d >= today;
   });
+
+  const past = sorted
+    .filter((gig) => {
+      const d = new Date(gig?.date);
+      if (isNaN(d)) return false;
+      d.setHours(0, 0, 0, 0);
+      return d < today;
+    })
+    .reverse();
+
+  const visibleGigs = activeTab === "upcoming" ? upcoming : past;
 
   return (
     <>
@@ -47,11 +74,41 @@ export default function Gigs({ gigs }) {
       <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-semibold tracking-tight">Gigs</h1>
 
-        {sorted.length === 0 ? (
-          <p className="mt-8 text-neutral-400">No gigs to show yet.</p>
+        <div className="mt-8 flex gap-3 border-b border-neutral-800">
+          <button
+            type="button"
+            onClick={() => setActiveTab("upcoming")}
+            className={`pb-3 text-sm font-medium ${
+              activeTab === "upcoming"
+                ? "text-white border-b-2 border-white"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            Upcoming gigs
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("past")}
+            className={`pb-3 text-sm font-medium ${
+              activeTab === "past"
+                ? "text-white border-b-2 border-white"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            Past gigs
+          </button>
+        </div>
+
+        {visibleGigs.length === 0 ? (
+          <p className="mt-8 text-neutral-400">
+            {activeTab === "upcoming"
+              ? "No upcoming gigs to show yet."
+              : "No past gigs to show yet."}
+          </p>
         ) : (
           <ul className="mt-8">
-            {sorted.map((gig, i) => {
+            {visibleGigs.map((gig, i) => {
               const key = `${gig?.id || gig?.slug || gig?.date || "gig"}-${i}`;
 
               const when =
@@ -61,7 +118,7 @@ export default function Gigs({ gigs }) {
 
               const title = gig?.title || gig?.venue || "Untitled event";
 
-              // City (and optionally country) only — avoids printing venue twice
+              // City and optionally country only — avoids printing venue twice
               const where = [gig?.city, gig?.country].filter(Boolean).join(", ");
 
               return (
@@ -83,29 +140,30 @@ export default function Gigs({ gigs }) {
                   )}
 
                   <div className="pt-2 text-sm">
-                    {gig?.tickets && gig.tickets !== "TBC" ? (
+                    {activeTab === "upcoming" &&
+                    gig?.tickets &&
+                    gig.tickets !== "TBC" ? (
                       <a
                         href={gig.tickets}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
                           color: "#2563eb",
-                         textDecoration: "underline",
-                         textDecorationColor: "#2563eb",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Tickets
-                        </a>
-
-                    ) : gig?.tickets === "TBC" ? (
+                          textDecoration: "underline",
+                          textDecorationColor: "#2563eb",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Tickets
+                      </a>
+                    ) : activeTab === "upcoming" && gig?.tickets === "TBC" ? (
                       <span className="text-neutral-400">Tickets TBC</span>
                     ) : null}
 
                     {gig?.link && (
                       <>
                         {" "}
-                        {gig?.tickets ? "· " : null}
+                        {activeTab === "upcoming" && gig?.tickets ? "· " : null}
                         <a
                           href={gig.link}
                           target="_blank"
@@ -126,7 +184,7 @@ export default function Gigs({ gigs }) {
                   </div>
 
                   {/* Divider between gigs */}
-                  {i < sorted.length - 1 && (
+                  {i < visibleGigs.length - 1 && (
                     <hr className="mt-4 border-neutral-800" />
                   )}
                 </li>
@@ -142,6 +200,7 @@ export default function Gigs({ gigs }) {
 export async function getStaticProps() {
   const filePath = path.join(process.cwd(), "public", "site-data", "gigs.json");
   let gigs = [];
+
   try {
     const raw = await fs.readFile(filePath, "utf-8");
     const data = JSON.parse(raw);
