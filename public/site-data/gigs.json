@@ -34,11 +34,18 @@
     "notes": "Doors 7:30pm, Start 8.00pm",
     "tickets": "https://www.tseac.ie/event-details/shadows-light"
   },
-  {
-    "date": "2026-09-12",
+  
+    "date": "2026-10-15",
     "venue": "Whale Theatre Greystones",
     "city": "Wicklow",
     "notes": "Doors 7:30pm, Start 8.00pm",
     "tickets": "https://whaletheatre.ticketsolve.com/ticketbooth/shows/873661882"
+  },
+   {
+    "date": "2026-09-12",
+    "venue": "Draíocht Blanchardstown Centre ",
+    "city": "Blanchardstown",
+    "notes": "Doors 7:30pm, Start 8.00pm",
+    "tickets": "https://draiocht.ticketsolve.com/ticketbooth/shows/1173667482"
   }
 ]
